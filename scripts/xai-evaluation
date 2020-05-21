@@ -1,0 +1,20 @@
+#!/bin/env python
+
+import argparse
+from xai_visualization.evaluation import evaluation
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("start the evaluation")
+    parser.add_argument("--config", type=str, help="the config", required=False)
+    args = parser.parse_args()
+
+    config = Config()
+
+    if args.config:
+        config.load_json(args.config)
+    else:
+        config.load_constants()
+
+    config.print()
+
+    evaluation()
