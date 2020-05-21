@@ -2,6 +2,7 @@
 
 import argparse
 from xai_visualization.evaluation import evaluation
+from xai_visualization.config import Config
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("start the evaluation")
@@ -13,7 +14,7 @@ if __name__ == "__main__":
     if args.config:
         config.load_json(args.config)
     else:
-        config.load_constants()
+        raise "Config not found"
 
     config.print()
 
