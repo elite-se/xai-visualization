@@ -13,8 +13,9 @@ class TFRecordsConverter:
         pass
 
     def create_example(self, features, annotations):
+        print(len(features))
         return tf.train.Example(features=tf.train.Features(feature={
-            'armscrossed': _float_feature([features[3]]),
+            'features': _float_feature(features),
             'label': _int_feature([annotations])}))
 
     def _write_tfrecord_file(self, raw_dir_path, output_dir_path):
