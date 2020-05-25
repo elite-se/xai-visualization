@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='xai-visualization',
-    packages=['xai_visualization', 'xai_visualization.models', 'xai_visualization.util'],
+    packages=['xai_visualization', 'xai_visualization.models', 'xai_visualization.util', 'xai_visualization.prepare'],
     scripts=['scripts/xai-train', 'scripts/xai-evaluation', 'scripts/xai-prepare'],
     version='0.1.0',
     description='HCI solutions',
