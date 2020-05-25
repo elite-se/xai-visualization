@@ -13,7 +13,9 @@ For Windows use these commnands:
 ```
 
 ### Run the training
-In activated (and set up) conda environment run:
+To run the training, place the contents of `korpus_no_video` in the `data` folder.
+
+In an activated (and set up) conda environment run:
 
 `python scripts/xai-train`
 
@@ -22,3 +24,4 @@ In activated (and set up) conda environment run:
 In activated (and set up) conda environment run:
 
 `python scripts/xai-evaluation`
+
