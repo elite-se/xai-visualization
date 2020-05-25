@@ -2,20 +2,13 @@
 
 import argparse
 from xai_visualization.config import Config
+from xai_visualization.prepare.TFRecordsConverter import TFRecordsConverter
+import numpy as np
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("convert input to tfrecords")
-    parser.add_argument("--dataset", type=str, help="the dataset", required=True)
-    parser.add_argument("--config", type=str, help="the config", required=False)
+    parser.add_argument("--raw_data", type=str, help="the raw data", required=True)
     args = parser.parse_args()
 
-    config = Config()
-
-    if args.config:
-        config.load_json(args.config)
-    else:
-        raise "Config not found"
-
-    config.print()
-
-    
+    converter = TFRecordsConverter()
+    converter.convert(args.raw_data, "./data/")
