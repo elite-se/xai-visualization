@@ -18,15 +18,14 @@ class TFRecordsConverter:
         """Write TFRecord file."""
 
         sessions = load_folder(raw_dir_path)
-        with tf.io.TFRecordWriter("%s/output.tfrecord" % output_dir_path, options='ZLIB') as writer:
+        with tf.io.TFRecordWriter("%s/sessions.tfrecord" % output_dir_path, options='ZLIB') as writer:
             
             for session in sessions:
                 expert_features, expert_annotations = session['expert']
-                novice_features, expert_annotations = session['novice']
+                novice_features, novice_annotations = session['novice']
 
                 writer.write(self.create_example(expert_features, expert_annotations).SerializeToString())
                 writer.write(self.create_example(novice_features, novice_annotations).SerializeToString())
-
 
 
     def convert(self, raw_dir_path, output_dir_path):
