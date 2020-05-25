@@ -42,10 +42,11 @@ def load_features(path):
 
 def load_annotations(path):
     annotations = np.genfromtxt(path, delimiter=';', dtype=np.float32)
+    # remove unnecessary confidence
+    annotations = annotations[:, 0]
 
     # discrete annotation in 3 values: low, medium and high engagement
     annotations = np.digitize(annotations, np.array([1.0 / 3.0, 2.0 / 3.0]))
-    annotations = to_categorical(annotations, num_classes=3, dtype='float32')
     return annotations
 
 
@@ -63,7 +64,11 @@ def load_folder(path):
         for guy in guys:
             features = load_features(os.path.join(subdir, guy + ".engagement_feature_set.stream~"))
             annotations = load_annotations(os.path.join(subdir, guy + ".engagement.gold.annotation~"))
-            annotations = annotations[:features.shape[0], 0]
+            number_of_frames = min(features.shape[0], annotations.shape[0])
+            annotations = annotations[:number_of_frames]
+            features = features[:number_of_frames]
             session[guy] = (features, annotations)
         sessions.append(session)
+
+        print('Added session ' + subdir + '.')
     return sessions
