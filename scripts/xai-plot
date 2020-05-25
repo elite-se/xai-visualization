@@ -1,0 +1,55 @@
+#!/bin/env python
+
+import argparse
+from xai_visualization.config import Config
+from xai_visualization.util.load_data import load_folder
+import matplotlib.pyplot as plt
+import matplotlib as matplotlib
+import numpy as np
+import time
+
+FREQUENCY = 25.
+feature_names = [
+    '0 Valence from Face (emax)',
+    '1 face horizontal movement (emax)',
+    '2 face vertical movement (emax)',
+    '3 armscrossed',
+    '4 headtouch',
+    '5 distance left hand left hip',
+    '6 distance right hand right hip',
+    '7 left elbow y rotation',
+    '8 right elbow y rotation',
+    '9 hand in front of left hip',
+    '10 hand in front of right hip',
+    '11 left elbow x rotation',
+    '12 right elbow x rotation',
+    '13 standard deviation head x position',
+    '14 standard deviation head x rotation',
+    '15 voice activity',
+    '16 Skeleton overall activation',
+    '17 Skeleton energy global max'
+]
+
+def plot(sessions):
+    for session in sessions:
+        for (guy, (features, labels)) in session.items():
+            formatter = matplotlib.ticker.FuncFormatter(lambda ms, x: time.strftime('%M:%S', time.gmtime(ms)))
+            (fig, axs) = plt.subplots(features.shape[1], sharex=True)
+            fig.suptitle('Session from: ' + guy)
+            fig.tight_layout()
+            fig.subplots_adjust(left=0.2)
+            plt.xlim((0, features.shape[0] / FREQUENCY))
+            for i in range(len(axs)):
+                axs[i].set_ylabel(feature_names[i], rotation='horizontal', x=-10, va='center', ha='right', fontsize=8)
+                axs[i].yaxis.set_ticks([])
+                axs[i].plot(np.arange(0, features.shape[0], 1) / FREQUENCY, features[:, i])
+                axs[i].xaxis.set_major_formatter(formatter)
+            plt.show()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("Plot feature set and annotation")
+    parser.add_argument("--raw_data", type=str, help="the raw data", default='data')
+    args = parser.parse_args()
+
+    sessions = load_folder(args.raw_data)
+    plot(sessions)
