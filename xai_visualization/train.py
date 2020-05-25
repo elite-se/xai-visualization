@@ -18,5 +18,3 @@ def train():
     data_test, labels_test = load_data(r'../../korpus_no_video/030_2016-04-06_Nottingham/')
     score = model.evaluate(data_test, labels_test)
     print(score)
-
-train()
