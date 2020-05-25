@@ -1,0 +1,21 @@
+#!/bin/env python
+
+import argparse
+from xai_visualization.config import Config
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("convert input to tfrecords")
+    parser.add_argument("--dataset", type=str, help="the dataset", required=True)
+    parser.add_argument("--config", type=str, help="the config", required=False)
+    args = parser.parse_args()
+
+    config = Config()
+
+    if args.config:
+        config.load_json(args.config)
+    else:
+        raise "Config not found"
+
+    config.print()
+
+    
