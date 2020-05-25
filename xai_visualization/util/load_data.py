@@ -1,5 +1,6 @@
 import numpy as np
-
+import os
+from tensorflow.python.keras.utils import to_categorical
 
 # every feature stream comes with two files, .stream and .stream~.
 # The first one has general information about the data, e.g. sample rate, number of dimension.
@@ -33,18 +34,36 @@ import numpy as np
 # 17 Skeleton energy global max
 
 
-# (samples, dimensions)
-from tensorflow.python.keras.utils import to_categorical
-
-
-def load_data(path):
-    features_file = open(path + "expert.engagement_feature_set.stream~", "r")
+def load_features(path):
+    features_file = open(path, "r")
     features = np.fromfile(features_file, dtype=np.float32)
-    features = features.reshape((int(features.shape[0] / 18), 18))
-    annotations = np.genfromtxt(path + "expert.engagement.gold.annotation~", delimiter=';', dtype=np.float32)
-    annotations = annotations[:features.shape[0], 0]
+    return features.reshape((int(features.shape[0] / 18), 18))
+
+
+def load_annotations(path):
+    annotations = np.genfromtxt(path, delimiter=';', dtype=np.float32)
 
     # discrete annotation in 3 values: low, medium and high engagement
-    annotation = np.digitize(annotations, np.array([1.0 / 3.0, 2.0 / 3.0]))
+    annotations = np.digitize(annotations, np.array([1.0 / 3.0, 2.0 / 3.0]))
     annotations = to_categorical(annotations, num_classes=3, dtype='float32')
-    return features, annotations
+    return annotations
+
+
+def load_folder(path):
+    sessions = []
+    for subdir, dirs, files in os.walk(path):
+        guys = ['expert', 'novice']
+        if not all([ guy + '.engagement_feature_set.stream~' in files
+                 and guy + '.engagement.gold.annotation~' in files
+                 for guy in guys]):
+            print('Folder ' + subdir + ' invalid. Skipping...')
+            continue
+
+        session = {}
+        for guy in guys:
+            features = load_features(os.path.join(subdir, guy + ".engagement_feature_set.stream~"))
+            annotations = load_annotations(os.path.join(subdir, guy + ".engagement.gold.annotation~"))
+            annotations = annotations[:features.shape[0], 0]
+            session[guy] = (features, annotations)
+        sessions.append(session)
+    return sessions
