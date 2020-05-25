@@ -2,21 +2,26 @@
 
 This is a python module which offers scripts to start training and evaluation
 
-# Setup
+# Usage
 
-## Use Anaconda
+### Setup using Anaconda
+For Windows use these commnands:
+```
+    conda create -c anaconda -n tf-gpu tensorflow-gpu=1.13.1
+    activate tf-gpu
+    pip install -e .
+```
 
-`conda create -n tf-gpu tensorflow-gpu=1.13.1`
+### Run the training
+To run the training, place the contents of `korpus_no_video` in the `data` folder.
 
-## Or use PIP
+In an activated (and set up) conda environment run:
 
-* `virtualenv3 venv`
-* `pip install -e .`
+`python scripts/xai-train`
 
-# Run the training
+### Run the evaluation
 
-* `CUDA_VISIBLE_DEVICES=1 xai-train`
+In activated (and set up) conda environment run:
 
-# Run the evaluation
+`python scripts/xai-evaluation`
 
-* `CUDA_VISIBLE_DEVICES=1 xai-evaluation`
