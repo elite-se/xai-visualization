@@ -6,6 +6,7 @@ from xai_visualization.config import Config
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("start the training")
+    parser.add_argument("--dataset", type=str, help="the path to the dataset", required=True)
     parser.add_argument("--config", type=str, help="the config", required=False)
     args = parser.parse_args()
 
@@ -18,4 +19,4 @@ if __name__ == "__main__":
 
     config.print()
 
-    train()
+    train(args.dataset)
