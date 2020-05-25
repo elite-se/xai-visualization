@@ -31,7 +31,7 @@ def train(dataset_path):
     #ds = ds.batch(10)
 
     parsed_dataset = ds.map(_parse_function)
-    parsed_dataset = parsed_dataset.shuffle(1000).repeat(100).batch(32)
+    parsed_dataset = parsed_dataset.shuffle(10000).repeat(100).batch(32)
 
     ##for parsed_record in parsed_dataset.take(10):
     #    print(repr(parsed_record))
@@ -44,7 +44,7 @@ def train(dataset_path):
     model = create_model()
 
     model.compile(optimizer='adam', loss=categorical_crossentropy, metrics=['accuracy'])
-    model.fit(parsed_dataset, epochs=100, steps_per_epoch=30, verbose=1)
+    model.fit(parsed_dataset, epochs=50, steps_per_epoch=100, verbose=1)
 
        
 
