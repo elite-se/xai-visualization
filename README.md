@@ -9,7 +9,7 @@ For Windows use these commnands:
 ```
     conda create -c anaconda -n tf-gpu tensorflow-gpu=1.13.1
     activate tf-gpu
-    pip install .
+    pip install -e .
 ```
 
 ### Run the training
