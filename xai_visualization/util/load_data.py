@@ -46,8 +46,8 @@ def load_annotations(path):
     annotations = annotations[:, 0]
 
     # discrete annotation in 3 values: low, medium and high engagement
-    annotations = np.digitize(annotations, np.array([1.0 / 3.0, 2.0 / 3.0]))
-    annotations = to_categorical(annotations, num_classes=3, dtype='float32')
+    annotations = np.digitize(annotations, [0.25, 0.5, 0.75])
+    annotations = to_categorical(annotations, num_classes=4, dtype='float32')
     return annotations
 
 

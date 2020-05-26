@@ -6,5 +6,5 @@ def create_model():
     model.add(Dense(1024, activation='relu'))
     model.add(Dense(512, activation='relu'))
     model.add(Dense(264, activation='relu'))
-    model.add(Dense(3, activation='sigmoid'))
+    model.add(Dense(4, activation='sigmoid'))
     return model
