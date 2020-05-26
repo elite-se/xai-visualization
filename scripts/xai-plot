@@ -34,16 +34,20 @@ def plot(sessions):
     for session in sessions:
         for (guy, (features, labels)) in session.items():
             formatter = matplotlib.ticker.FuncFormatter(lambda ms, x: time.strftime('%M:%S', time.gmtime(ms)))
-            (fig, axs) = plt.subplots(features.shape[1], sharex=True)
+            (fig, axs) = plt.subplots(features.shape[1] + 1, sharex=True)
             fig.suptitle('Session from: ' + guy)
             fig.tight_layout()
             fig.subplots_adjust(left=0.2)
             plt.xlim((0, features.shape[0] / FREQUENCY))
-            for i in range(len(axs)):
+            for i in range(len(feature_names)):
                 axs[i].set_ylabel(feature_names[i], rotation='horizontal', x=-10, va='center', ha='right', fontsize=8)
                 axs[i].yaxis.set_ticks([])
                 axs[i].plot(np.arange(0, features.shape[0], 1) / FREQUENCY, features[:, i])
                 axs[i].xaxis.set_major_formatter(formatter)
+
+            axs[-1].yaxis.set_ticks([])
+            axs[-1].plot(np.arange(0, features.shape[0], 1), np.argmax(labels==1, axis=1))
+            axs[-1].set_ylabel("Engagement", rotation='horizontal', x=-10, va='center', ha='right', fontsize=8)
             plt.show()
 
 if __name__ == "__main__":
