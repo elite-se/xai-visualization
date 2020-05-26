@@ -14,7 +14,7 @@ from xai_visualization.util.plot import plot_train_history
 
 EVALUATION_INTERVAL = 200
 EPOCHS = 50
-BATCH_SIZE = 512
+BATCH_SIZE = 128
 BUFFER_SIZE = 10000
 
 def flatten_data(dataset_path):
