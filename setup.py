@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name='xai-visualization',
     packages=['xai_visualization', 'xai_visualization.models', 'xai_visualization.util', 'xai_visualization.prepare'],
-    scripts=['scripts/xai-train', 'scripts/xai-evaluation', 'scripts/xai-prepare', 'scripts/xai-plot'],
+    scripts=['scripts/xai-train', 'scripts/xai-evaluation', 'scripts/xai-prepare', 'scripts/xai-plot', 'scripts/xai-explain'],
     version='0.1.0',
     description='HCI solutions',
     author='maxammann',
@@ -15,6 +15,7 @@ setup(
         'numpy==1.16.4',
         'tensorflow==1.13.1',
         'lime==0.2.0.0',
-        'hickle==3.4.6'
+        'hickle==3.4.6',
+        'innvestigate==1.0.8'
     ]
 )

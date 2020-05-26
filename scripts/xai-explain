@@ -1,0 +1,33 @@
+#!/bin/env python
+
+import argparse
+from xai_visualization.config import Config
+from tensorflow import keras
+import innvestigate
+
+def explain(model):
+    # to use the innvestigate framework we need to remove the softmax layer of our model
+    # model_wo_sm = innvestigate.utils.model_wo_softmax(model)
+
+    # initialize analyzer
+    # innvestigate comes with a bunch of different analyzers
+    analyzer_LRP = innvestigate.analyzer.LRPAlpha1Beta0IgnoreBias(model)
+
+    # analyzer_DeepTaylor = investigate.analyzer.DeepTaylor(model_wo_sm)
+
+    # create explanation for a specific sample
+    analysis = analyzer_LRP.analyze([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("explain the decisions of the model")
+    parser.add_argument("--model", type=str, help="the path to the model", required=True)
+    parser.add_argument("--config", type=str, help="the config", required=False)
+    args = parser.parse_args()
+
+    
+    model = keras.models.load_model(args.model)
+
+    explain(model)

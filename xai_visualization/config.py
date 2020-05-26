@@ -18,7 +18,7 @@ class Config(object):
         self.batch_size = config['batch_size']
         self.epochs = config['epochs']
 
-    def load_defaults(self, config):
+    def load_defaults(self):
         self.learning_rate = 0.01
         self.batch_size = 32
         self.epochs = 5
