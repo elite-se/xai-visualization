@@ -14,7 +14,7 @@ if __name__ == "__main__":
     if args.config:
         config.load_json(args.config)
     else:
-        raise "Config not found"
+        config.load_defaults()
 
     config.print()
 

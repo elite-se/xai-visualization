@@ -13,8 +13,6 @@ from xai_visualization.util.window import multivariate_data
 from xai_visualization.util.plot import plot_train_history
 
 EVALUATION_INTERVAL = 200
-EPOCHS = 50
-BATCH_SIZE = 128
 BUFFER_SIZE = 10000
 
 def flatten_data(dataset_path):
@@ -57,26 +55,29 @@ def prepare_dataset(dataset_path):
 
     return data_train, labels_train, data_test, labels_test
 
-def train(dataset_path):
+def train(config, dataset_path):
     #tf.compat.v1.enable_eager_execution()
+    batch_size = config.batch_size
+    learning_rate = config.learning_rate
+    epochs = config.epochs
 
     data_train, labels_train, data_test, labels_test = prepare_dataset(dataset_path)
     # data_train, labels_train, data_test, labels_test = prepare_windowed_dataset(dataset_path)
 
     train_data = tf.data.Dataset.from_tensor_slices(
         (data_train, labels_train)
-    ).cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
+    ).cache().shuffle(BUFFER_SIZE).batch(batch_size).repeat()
 
     val_data = tf.data.Dataset.from_tensor_slices(
         (data_test, labels_test)
-    ).batch(BATCH_SIZE).repeat()
+    ).batch(batch_size).repeat()
 
     steps_per_epoch = int(data_train.shape[0] / BUFFER_SIZE)
 
 
     # lstm_model = create_lstm_model([15,18])
-    # lstm_model.compile(optimizer='adam', loss=categorical_crossentropy, metrics=['accuracy'])
-    # history = lstm_model.fit(train_data, epochs=EPOCHS,
+    # lstm_model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate), loss=categorical_crossentropy, metrics=['accuracy'])
+    # history = lstm_model.fit(train_data, epochs=epochs,
     #                                         steps_per_epoch=steps_per_epoch,
     #                                         validation_data=val_data,
     #                                         validation_steps=50)
@@ -84,9 +85,9 @@ def train(dataset_path):
 
 
     model = create_dense_model()
-    model.compile(optimizer='adam', loss=categorical_crossentropy, metrics=['accuracy'])
+    model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate), loss=categorical_crossentropy, metrics=['accuracy'])
     history = model.fit(train_data, 
-                    epochs=EPOCHS,
+                    epochs=epochs,
                     steps_per_epoch=steps_per_epoch,
                     validation_data=val_data,
                     validation_steps=50

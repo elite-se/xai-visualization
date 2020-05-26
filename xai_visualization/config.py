@@ -15,8 +15,13 @@ class Config(object):
 
     def load_dict(self, config):
         self.learning_rate = config['learning_rate']
-        self.n_layers = config['n_layers']
-        self.n_hidden = config['n_hidden']
+        self.batch_size = config['batch_size']
+        self.epochs = config['epochs']
+
+    def load_defaults(self, config):
+        self.learning_rate = 0.01
+        self.batch_size = 32
+        self.epochs = 5
 
     def print(self):
         print("Current configuration: %s" % json.dumps(self.__dict__, indent=4))
