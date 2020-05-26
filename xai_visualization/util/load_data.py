@@ -1,5 +1,6 @@
 import numpy as np
 import os
+from tensorflow.python.keras.utils import to_categorical
 
 # every feature stream comes with two files, .stream and .stream~.
 # The first one has general information about the data, e.g. sample rate, number of dimension.
@@ -46,6 +47,7 @@ def load_annotations(path):
 
     # discrete annotation in 3 values: low, medium and high engagement
     annotations = np.digitize(annotations, np.array([1.0 / 3.0, 2.0 / 3.0]))
+    annotations = to_categorical(annotations, num_classes=3, dtype='float32')
     return annotations
 
 

@@ -1,16 +1,20 @@
-import tensorflow as tf
-from tensorflow.contrib.learn.python.learn.estimators._sklearn import train_test_split
-from tensorflow.python.keras.utils import to_categorical
 
-from xai_visualization.models.dense_model import create_model
-from xai_visualization.util.load_data import load_folder
 import os
 import numpy as np
+import tensorflow as tf
+
+from tensorflow.contrib.learn.python.learn.estimators._sklearn import train_test_split
 from tensorflow.python.keras.losses import categorical_crossentropy
 
+from xai_visualization.models.dense_model import create_model as create_dense_model
+from xai_visualization.models.lstm_model import create_model as create_lstm_model
+from xai_visualization.util.load_data import load_folder
+from xai_visualization.util.window import multivariate_data
+from xai_visualization.util.plot import plot_train_history
+
 EVALUATION_INTERVAL = 200
-EPOCHS = 10
-BATCH_SIZE = 256
+EPOCHS = 50
+BATCH_SIZE = 512
 BUFFER_SIZE = 10000
 
 def flatten_data(dataset_path):
@@ -24,38 +28,67 @@ def flatten_data(dataset_path):
                 all_features.append(feature)
                 all_annotations.append(label)
 
-    return all_features, all_annotations
+    return np.array(all_features), np.array(all_annotations)
+
+def prepare_windowed_dataset(dataset_path):
+    all_features, all_annotations = flatten_data(dataset_path) # FIXME: Currently all sessions are concated, this means that a single window can contain samples from different sessions
+
+    STEP = 7
+    HISTORY = 100
+    data_train, labels_train = multivariate_data(all_features, all_annotations, 0,
+                                                   int(0.8 * len(all_features)), HISTORY,
+                                                   0, STEP,
+                                                   single_step=True)
+
+    data_test, labels_test = multivariate_data(all_features, all_annotations,
+                                                   int(0.8 * len(all_features)), None, 100,
+                                                   0, STEP,
+                                                   single_step=True)
+    print ('Single window of past history : {}'.format(data_train[0].shape))
+    print ('Window shape : {}'.format(data_train.shape[-2:]))
+
+    return data_train, labels_train, data_test, labels_test
+
 
 def prepare_dataset(dataset_path):
     all_features, all_annotations = flatten_data(dataset_path)
 
     data_train, data_test, labels_train, labels_test = train_test_split(np.array(all_features), np.array(all_annotations), test_size=0.20, random_state=42)
 
-    train_data_single = tf.data.Dataset.from_tensor_slices(
-        (np.array(data_train), np.array(labels_train))
-    ).cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
-
-    val_data_single = tf.data.Dataset.from_tensor_slices(
-        (data_test, labels_test)
-    ).batch(BATCH_SIZE).repeat()
-
-
-    steps_per_epoch = int(data_train.shape[0] / BUFFER_SIZE)
-
-    return train_data_single, val_data_single, steps_per_epoch
+    return data_train, labels_train, data_test, labels_test
 
 def train(dataset_path):
     #tf.compat.v1.enable_eager_execution()
 
-    train_data_single, val_data_single, steps_per_epoch = prepare_dataset(dataset_path)
+    data_train, labels_train, data_test, labels_test = prepare_dataset(dataset_path)
+    # data_train, labels_train, data_test, labels_test = prepare_windowed_dataset(dataset_path)
 
-    model = create_model()
+    train_data = tf.data.Dataset.from_tensor_slices(
+        (data_train, labels_train)
+    ).cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
 
+    val_data = tf.data.Dataset.from_tensor_slices(
+        (data_test, labels_test)
+    ).batch(BATCH_SIZE).repeat()
+
+    steps_per_epoch = int(data_train.shape[0] / BUFFER_SIZE)
+
+
+    # lstm_model = create_lstm_model([15,18])
+    # lstm_model.compile(optimizer='adam', loss=categorical_crossentropy, metrics=['accuracy'])
+    # history = lstm_model.fit(train_data, epochs=EPOCHS,
+    #                                         steps_per_epoch=steps_per_epoch,
+    #                                         validation_data=val_data,
+    #                                         validation_steps=50)
+    # plot_train_history(history, 'LSTM Training and validation loss')
+
+
+    model = create_dense_model()
     model.compile(optimizer='adam', loss=categorical_crossentropy, metrics=['accuracy'])
-
-    model.fit(train_data_single, 
+    history = model.fit(train_data, 
                     epochs=EPOCHS,
                     steps_per_epoch=steps_per_epoch,
-                    validation_data=val_data_single,
+                    validation_data=val_data,
                     validation_steps=50
     )
+    plot_train_history(history, 'Dense Training and validation loss')
