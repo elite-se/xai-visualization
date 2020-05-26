@@ -13,7 +13,7 @@ setup(
         'matplotlib==3.2.1',
         'scikit-learn==0.23.1',
         'numpy==1.16.4',
-        'tensorflow==1.13.1',
+        'tensorflow==1.15.2',
         'lime==0.2.0.0',
         'hickle==3.4.6',
         'innvestigate==1.0.8'
