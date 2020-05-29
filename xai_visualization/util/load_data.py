@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from tensorflow.python.keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 
 # every feature stream comes with two files, .stream and .stream~.
 # The first one has general information about the data, e.g. sample rate, number of dimension.

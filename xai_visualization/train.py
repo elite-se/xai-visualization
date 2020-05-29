@@ -3,8 +3,8 @@ import os
 import numpy as np
 import tensorflow as tf
 
-from tensorflow.contrib.learn.python.learn.estimators._sklearn import train_test_split
-from tensorflow.python.keras.losses import categorical_crossentropy
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.losses import categorical_crossentropy
 
 from xai_visualization.models.dense_model import create_model as create_dense_model
 from xai_visualization.models.lstm_model import create_model as create_lstm_model
