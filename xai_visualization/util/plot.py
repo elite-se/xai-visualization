@@ -12,8 +12,8 @@ def plot_train_history(history, title):
 
   plt.plot(epochs, loss, 'b', label='Training loss')
   plt.plot(epochs, val_loss, 'r', label='Validation loss')
-  plt.plot(epochs, acc, 'b', label='Training Accuracy')
-  plt.plot(epochs, val_acc, 'r', label='Validation Accuracy')
+  plt.plot(epochs, acc, 'g', label='Training Accuracy')
+  plt.plot(epochs, val_acc, 'c', label='Validation Accuracy')
   plt.title(title)
   plt.legend()
 
