@@ -7,7 +7,7 @@ This is a python module which offers scripts to start training and evaluation
 ### Setup using Anaconda
 For Windows use these commnands:
 ```
-    conda create -c anaconda -n tf-gpu tensorflow-gpu=1.13.1
+    conda create -c anaconda -n tf-gpu tensorflow-gpu=2.1
     activate tf-gpu
     pip install -e .
 ```
