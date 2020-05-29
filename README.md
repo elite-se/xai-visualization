@@ -12,6 +12,16 @@ For Windows use these commnands:
     pip install -e .
 ```
 
+### Setup innvestigate for tensorflow 2
+
+Execute the folowing in your activated conda environment:
+
+```
+git clone https://github.com/albermax/innvestigate.git
+git checkout --track remotes/origin/feature/version2.0_rc0
+python setup.py install
+```
+
 ### Run the training
 To run the training, place the contents of `korpus_no_video` in the `data` folder.
 
