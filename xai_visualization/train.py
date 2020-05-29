@@ -93,9 +93,4 @@ def train(config, dataset_path, model_path):
                     validation_steps=50
     )
     model.save(model_path)
-    from innvestigate import create_analyzer
-
-    analyzer = create_analyzer("gradient", model)
-    analysis_result = analyzer.analyze([data_train[0:1]])
-
     plot_train_history(history, 'Dense Training and validation loss')
