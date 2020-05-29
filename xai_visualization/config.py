@@ -21,7 +21,7 @@ class Config(object):
     def load_defaults(self):
         self.learning_rate = 0.01
         self.batch_size = 32
-        self.epochs = 5
+        self.epochs = 1
 
     def print(self):
         print("Current configuration: %s" % json.dumps(self.__dict__, indent=4))
