@@ -17,4 +17,5 @@ setup(
         'lime==0.2.0.0',
         'hickle==3.4.6',
         'innvestigate==2.0.0'
+    ]
 )
