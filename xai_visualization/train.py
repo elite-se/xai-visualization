@@ -55,7 +55,7 @@ def prepare_dataset(dataset_path):
 
     return data_train, labels_train, data_test, labels_test
 
-def train(config, dataset_path, model):
+def train(config, dataset_path, model_path):
     #tf.compat.v1.enable_eager_execution()
     batch_size = config.batch_size
     learning_rate = config.learning_rate
@@ -85,12 +85,12 @@ def train(config, dataset_path, model):
 
 
     model = create_dense_model()
-    model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate), loss=categorical_crossentropy, metrics=['accuracy'])
+    model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate), loss=categorical_crossentropy, metrics=['accuracy'], experimental_run_tf_function=True)
     history = model.fit(train_data, 
                     epochs=epochs,
                     steps_per_epoch=steps_per_epoch,
                     validation_data=val_data,
                     validation_steps=50
     )
-    model.save(model)
+    model.save(model_path)
     plot_train_history(history, 'Dense Training and validation loss')
