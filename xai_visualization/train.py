@@ -55,7 +55,7 @@ def prepare_dataset(dataset_path):
 
     return data_train, labels_train, data_test, labels_test
 
-def train(config, dataset_path, model_dir):
+def train(config, dataset_path, model):
     #tf.compat.v1.enable_eager_execution()
     batch_size = config.batch_size
     learning_rate = config.learning_rate
@@ -92,4 +92,5 @@ def train(config, dataset_path, model_dir):
                     validation_data=val_data,
                     validation_steps=50
     )
+    model.save(model)
     plot_train_history(history, 'Dense Training and validation loss')
