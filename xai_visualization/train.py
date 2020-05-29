@@ -1,11 +1,14 @@
 
 import os
+
+import keras
 import numpy as np
 import tensorflow as tf
 
 from tensorflow.contrib.learn.python.learn.estimators._sklearn import train_test_split
-from tensorflow.python.keras.losses import categorical_crossentropy
+from keras.losses import categorical_crossentropy
 
+# from xai_visualization.innvestigate import analyze_model
 from xai_visualization.models.dense_model import create_model as create_dense_model
 from xai_visualization.models.lstm_model import create_model as create_lstm_model
 from xai_visualization.util.load_data import load_folder
@@ -85,7 +88,7 @@ def train(config, dataset_path, model_dir):
 
 
     model = create_dense_model()
-    model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate), loss=categorical_crossentropy, metrics=['accuracy'])
+    model.compile(optimizer=keras.optimizers.Adam(lr=learning_rate), loss=categorical_crossentropy, metrics=['accuracy'])
     history = model.fit(train_data, 
                     epochs=epochs,
                     steps_per_epoch=steps_per_epoch,
@@ -93,3 +96,5 @@ def train(config, dataset_path, model_dir):
                     validation_steps=50
     )
     plot_train_history(history, 'Dense Training and validation loss')
+    model.save("models/dense50")
+    # analyze_model(model, data_test)

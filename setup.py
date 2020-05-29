@@ -16,6 +16,7 @@ setup(
         'tensorflow==1.13.1',
         'lime==0.2.0.0',
         'hickle==3.4.6',
-        'innvestigate==1.0.8'
+        'innvestigate==1.0.8',
+        'keras==2.3.1'
     ]
 )
