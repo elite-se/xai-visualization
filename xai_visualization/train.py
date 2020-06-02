@@ -56,7 +56,6 @@ def prepare_dataset(dataset_path):
     return data_train, labels_train, data_test, labels_test
 
 def train(config, dataset_path, model_path):
-    #tf.compat.v1.enable_eager_execution()
     batch_size = config.batch_size
     learning_rate = config.learning_rate
     epochs = config.epochs

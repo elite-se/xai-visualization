@@ -3,16 +3,17 @@
 import argparse
 from xai_visualization.config import Config
 from tensorflow import keras
-import innvestigate
-from tf_explain.callbacks.vanilla_gradients import VanillaGradients
 import numpy as np
 import shap
 from xai_visualization.train import prepare_dataset
 from xai_visualization.util.load_data import feature_names
+import tensorflow as tf
 
 def explain(model):
     data_train, labels_train, data_test, labels_test = prepare_dataset("data")
-    explainer = shap.GradientExplainer(model, data_train[:100])
+    #explainer = shap.GradientExplainer(model, data_train[:100])
+    #explainer = shap.KernelExplainer(model, data_train[:100]) # Also not working
+    explainer = shap.DeepExplainer(model, data_train[:100]) # Currently is not supported in TF2: https://github.com/slundberg/shap/issues/885#issuecomment-564778328
     shap_values = explainer.shap_values(data_train[:10])
 
     shap.summary_plot(shap_values, data_train[:10], 
@@ -28,6 +29,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", type=str, help="the config", required=False)
     args = parser.parse_args()
 
+    tf.compat.v1.disable_eager_execution()
     
     model = keras.models.load_model(args.model)
 
