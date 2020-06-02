@@ -73,3 +73,24 @@ def load_folder(path):
 
         print('Added session ' + subdir + '.')
     return sessions
+
+feature_names = [
+    '0 Valence from Face (emax)',
+    '1 face horizontal movement (emax)',
+    '2 face vertical movement (emax)',
+    '3 armscrossed',
+    '4 headtouch',
+    '5 distance left hand left hip',
+    '6 distance right hand right hip',
+    '7 left elbow y rotation',
+    '8 right elbow y rotation',
+    '9 hand in front of left hip',
+    '10 hand in front of right hip',
+    '11 left elbow x rotation',
+    '12 right elbow x rotation',
+    '13 standard deviation head x position',
+    '14 standard deviation head x rotation',
+    '15 voice activity',
+    '16 Skeleton overall activation',
+    '17 Skeleton energy global max'
+]

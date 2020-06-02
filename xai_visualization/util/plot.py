@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 
 def plot_train_history(history, title):
-  print(history.history)
   loss = history.history['loss']
   val_loss = history.history['val_loss']
   acc = history.history['accuracy']
