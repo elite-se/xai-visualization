@@ -1,11 +1,23 @@
 import React from "react";
-import "./ExplanationsContainer.css";
+import styled from "styled-components";
+
+const Container = styled.div`
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid gray;
+    border-left: 0;
+`
 
 function ExplanationsContainer() {
     return (
-        <div className="ExplanationsContainer">
+        <Container>
             <h2>EXPLANATIONS</h2>
-        </div>
+        </Container>
     );
 }
 

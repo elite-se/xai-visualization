@@ -1,20 +1,39 @@
 import React from "react";
-import { Card, Elevation } from "@blueprintjs/core";
+import {Card, Elevation} from "@blueprintjs/core";
 import VideoFeed from "./VideoFeed";
 import ExplanationsContainer from "./ExplanationsContainer";
-import "./Participant.css";
+import styled from "styled-components";
 
-function Participant(props: any) {
+const ParticipantLayout = styled.div`
+    width: 100%;
+    box-sizing: border-box;
+
+    display: flex;
+`
+
+const VideoArea = styled.div`
+   position: relative;
+`
+
+const Name = styled.h4`
+    position: absolute;
+    bottom: 0;
+    padding: 12px 32px 12px 20px;
+    background: rgb(34, 34, 34);
+    color: white;
+    margin: 0;
+`
+
+function Participant(props: { videoURL: string, name: string }) {
     return (
         <Card elevation={Elevation.TWO}>
-            <div className="ParticipantLayout">
-                <div className="video-area">
-                    <VideoFeed videoURL={props.videoURL}></VideoFeed>
-                    <h4 className="name">{props.name}</h4>
-                </div>
-
-                <ExplanationsContainer></ExplanationsContainer>
-            </div>
+            <ParticipantLayout>
+                <VideoArea>
+                    <VideoFeed videoURL={props.videoURL}/>
+                    <Name>{props.name}</Name>
+                </VideoArea>
+                <ExplanationsContainer/>
+            </ParticipantLayout>
         </Card>
     );
 }

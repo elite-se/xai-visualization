@@ -1,16 +1,46 @@
 import React from "react";
-import "./VideoFeed.css";
+import styled from "styled-components";
 
-function VideoFeed(props: any) {
+const VideoContainer = styled.div`
+    /* TODO: this should probably be passed in from somewhere 
+    further up the hierarchy once we have more than one videofeed */
+    
+    --video-width: 60vw;
+
+    width: var(--video-width);
+    height: calc(var(--video-width) * 0.562); /* 16:9 video */
+
+    position: relative;
+    
+    video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+`
+
+const Placeholder = styled.h2`
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.5);
+    color: black;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+`
+
+function VideoFeed(props: { videoURL: string }) {
     return (
-        <div className="VideoFeed">
+        <VideoContainer>
             <video controls muted autoPlay>
-                <source src={props.videoURL} type="video/mp4"></source>
+                <source src={props.videoURL} type="video/mp4"/>
                 Your browser does not support HTML video.
             </video>
 
-            <h2 className="placeholder">VIDEO FEED</h2>
-        </div>
+            <Placeholder>VIDEO FEED</Placeholder>
+        </VideoContainer>
     );
 }
 
