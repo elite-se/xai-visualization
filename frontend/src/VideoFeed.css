@@ -6,10 +6,23 @@
     width: var(--video-width);
     height: calc(var(--video-width) * 0.562); /* 16:9 video */
 
-    background: grey;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+}
+
+.VideoFeed video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+h2.placeholder {
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.5);
+    color: black;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
