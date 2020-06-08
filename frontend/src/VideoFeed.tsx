@@ -11,6 +11,7 @@ const VideoContainer = styled.div`
     height: calc(var(--video-width) * 0.562); /* 16:9 video */
 
     position: relative;
+    overflow: hidden;
 
     video {
         position: absolute;

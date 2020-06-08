@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { HorizontalBar } from "react-chartjs-2";
+import { Colors } from "@blueprintjs/core";
 
 const Container = styled.div`
     flex-grow: 1;
@@ -9,9 +10,6 @@ const Container = styled.div`
     flex-direction: column;
     align-items: center;
 
-    border: 1px solid gray;
-    border-left: 0;
-
     box-sizing: border-box;
     padding: 12px 8px;
 `;
@@ -19,12 +17,12 @@ const Container = styled.div`
 const Divider = styled.div`
     width: 90%;
     height: 1px;
-    background: #a7b6c2;
+    background: ${Colors.GRAY4};
     margin: 12px auto;
 `;
 
 const ConfidenceBox = styled.div`
-    border: 1px solid #30404d;
+    border: 1px solid ${Colors.DARK_GRAY4};
     box-sizing: border-box;
     padding: 6px;
 `;
@@ -37,6 +35,8 @@ const Heading = styled.h3`
     margin: 0 0 6px 0;
     text-transform: uppercase;
 `;
+
+const CHART_COLOR_PALETTE = [Colors.TURQUOISE4, Colors.INDIGO4, Colors.GOLD4, Colors.COBALT4];
 
 function ExplanationsContainer() {
     return (
@@ -53,7 +53,7 @@ function ExplanationsContainer() {
                     datasets: [
                         {
                             label: "Testing Explanations",
-                            backgroundColor: ["#14CCBD", "#9179F2", "#F2B824", "#4580E6"],
+                            backgroundColor: CHART_COLOR_PALETTE,
                             data: [0.4, 0.2, 0.15, 0.1],
                         },
                     ],
