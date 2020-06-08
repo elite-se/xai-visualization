@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Colors } from "@blueprintjs/core";
 
-const ENGAGEMENT_COLORS = [Colors.RED3, Colors.ORANGE3, Colors.BLUE3, Colors.GREEN3]; //assuming 0 is low engagement
+const ENGAGEMENT_COLORS = [Colors.GREEN3, Colors.BLUE3, Colors.ORANGE3, Colors.RED3]; //assuming 0 is high engagement
 
 const Indicator = styled.div`
     width: 24px;
