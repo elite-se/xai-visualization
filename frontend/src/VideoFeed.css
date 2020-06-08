@@ -1,0 +1,15 @@
+.VideoFeed {
+    /* TODO: this should probably be passed in from somewhere 
+    further up the hierarchy once we have more than one videofeed */
+    --video-width: 60vw;
+
+    width: var(--video-width);
+    height: calc(var(--video-width) * 0.562); /* 16:9 video */
+
+    background: grey;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
