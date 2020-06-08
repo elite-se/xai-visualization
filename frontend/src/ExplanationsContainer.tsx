@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import {HorizontalBar} from "react-chartjs-2";
-import {Colors} from "@blueprintjs/core";
+import { HorizontalBar } from "react-chartjs-2";
+import { Colors } from "@blueprintjs/core";
 
 const Container = styled.div`
     flex-grow: 1;
@@ -29,6 +29,8 @@ const ConfidenceBox = styled.div`
 
 const ConfidenceValue = styled.span`
     font-weight: bold;
+    display: inline-block;
+    width: 45px;
 `;
 
 const Heading = styled.h3`
@@ -36,27 +38,44 @@ const Heading = styled.h3`
     text-transform: uppercase;
 `;
 
-const CHART_COLOR_PALETTE = [Colors.TURQUOISE4, Colors.INDIGO4, Colors.GOLD4, Colors.COBALT4];
+const CHART_COLOR_PALETTE = [
+    Colors.ROSE3,
+    Colors.ROSE4,
+    Colors.ROSE5,
+    Colors.VIOLET3,
+    Colors.VIOLET4,
+    Colors.VIOLET5,
+    Colors.INDIGO3,
+    Colors.INDIGO4,
+    Colors.INDIGO5,
+    Colors.COBALT3,
+    Colors.COBALT4,
+    Colors.COBALT5,
+    Colors.BLUE3,
+    Colors.BLUE4,
+    Colors.BLUE5,
+    Colors.TURQUOISE3,
+    Colors.TURQUOISE4,
+    Colors.TURQUOISE5,
+];
 
-const engagement_labels = [
-    'very engaged',
-    'slightly engaged',
-    'slightly unattentive',
-    'very unattentive'
-]
+const engagement_labels = ["very engaged", "slightly engaged", "slightly unattentive", "very unattentive"];
 
-
-function ExplanationsContainer(props: { dataPoint: { input: number[], output: number[], explanations: number[] }, labels: string[] }) {
-    const {output, explanations} = props.dataPoint
-    const strongestOutput = output.indexOf(Math.max(...output))
-    const confidence = Math.round(output[strongestOutput] * 1000) / 10
+function ExplanationsContainer(props: {
+    dataPoint: { input: number[]; output: number[]; explanations: number[] };
+    labels: string[];
+}) {
+    const { output, explanations } = props.dataPoint;
+    const strongestOutput = output.indexOf(Math.max(...output));
+    const confidence = Math.round(output[strongestOutput] * 1000) / 10;
     return (
         <Container>
             <Heading>Confidence</Heading>
             <ConfidenceBox>
-                <ConfidenceValue>{`${confidence}%`}</ConfidenceValue>{` confident for "${engagement_labels[strongestOutput]}".`}
+                <ConfidenceValue>{`${confidence}%`}</ConfidenceValue>
+                {` confident for "${engagement_labels[strongestOutput]}".`}
             </ConfidenceBox>
-            <Divider/>
+            <Divider />
             <Heading>Explanations</Heading>
             <HorizontalBar
                 data={{
