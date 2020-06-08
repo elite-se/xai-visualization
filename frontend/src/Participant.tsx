@@ -4,6 +4,7 @@ import VideoFeed from "./VideoFeed";
 import ExplanationsContainer from "./ExplanationsContainer";
 import styled from "styled-components";
 import loadEngagementData from "./loadEngagementData";
+import UserInfo from "./UserInfo";
 
 const ParticipantLayout = styled.div`
     width: 100%;
@@ -17,35 +18,36 @@ const VideoArea = styled.div`
     border-right: 1px solid ${Colors.GRAY1};
 `;
 
-const Name = styled.h4`
+const UserInfoContainer = styled.div`
     position: absolute;
     bottom: 0;
-    padding: 12px 32px 12px 20px;
-    background: rgb(34, 34, 34);
-    color: white;
     margin: 0;
 `;
 
-const dataContainer = loadEngagementData()
+const dataContainer = loadEngagementData();
 
 class Participant extends React.Component<{ videoURL: string; name: string }, { currentTime: number }> {
+    state = { currentTime: 0 };
 
-    state = { currentTime: 0 }
+    onTimeUpdate = (currentTime: number) => this.setState({ currentTime });
 
-    onTimeUpdate = (currentTime: number) => this.setState({ currentTime })
+    render() {
+        const { videoURL } = this.props;
+        const { currentTime } = this.state;
+        const dataPoint = dataContainer.data[Math.floor(currentTime * dataContainer.sampleRate)];
 
-    render () {
-        const { videoURL, name } = this.props
-        const { currentTime } = this.state
-        const dataPoint = dataContainer.data[Math.floor(currentTime * dataContainer.sampleRate)]
+        const outputClass = dataPoint.output.indexOf(Math.max(...dataPoint.output));
+
         return (
             <Card elevation={Elevation.TWO}>
                 <ParticipantLayout>
                     <VideoArea>
-                        <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate}/>
-                        <Name>{name}</Name>
+                        <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate} />
+                        <UserInfoContainer>
+                            <UserInfo name={"John Doe"} engagementLevel={outputClass}></UserInfo>
+                        </UserInfoContainer>
                     </VideoArea>
-                    <ExplanationsContainer labels={dataContainer.labels} dataPoint={dataPoint}/>
+                    <ExplanationsContainer labels={dataContainer.labels} dataPoint={dataPoint} />
                 </ParticipantLayout>
             </Card>
         );
