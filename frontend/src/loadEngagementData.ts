@@ -1,19 +1,23 @@
-import { reduce } from "lodash"
+import {reduce} from "lodash"
 
-
-const interpolate = (label: string, t: number) => {
+const createInterpolator = (label: string, numberPoints: number) => {
     // quadratic bezier based on label
     let seed = reduce(label.split(''), (acc: number, char: string) => acc + char.charCodeAt(0), 0)
     const random = () => {
         const x = Math.sin(seed++) * 10000;
         return x - Math.floor(x);
     }
-    const y0 = random()
-    const y1 = random()
-    const y2 = random()
+    const y = Array.from(Array(numberPoints).keys()).map(random)
 
-    const y = (y0 - 2*y1 + y2) * t*t + (-2*y0 + 2*y1)*t + y0
-    return y
+    return (t: number) => {
+        const firstPoint = Math.floor(t * numberPoints / 2) * 2
+        const y0 = y[firstPoint]
+        const y1 = y[firstPoint + 1]
+        const y2 = y[firstPoint + 2]
+
+        const t1 = (t - firstPoint / numberPoints) * numberPoints / 2
+        return (y0 - 2 * y1 + y2) * t1 * t1 + (-2 * y0 + 2 * y1) * t1 + y0
+    }
 }
 
 const loadEngagementData = () => {
@@ -41,20 +45,25 @@ const loadEngagementData = () => {
     ]
 
     const numberSamples = Math.ceil(videoDuration * sampleRate)
+    const numberPoints = Math.max(Math.floor(videoDuration / 5) * 2, 2) + 1 // Ca. alle 20 Sekunden neue Bezier Kurve
 
-    const data: { input: number[], output: number[], explanations: number[]}[] = []
+    const data: { input: number[], output: number[], explanations: number[] }[] = []
 
-    for(let i = 0; i < numberSamples; i++) {
+    const inputInterpolators = labels.map(label => createInterpolator('i' + label, numberPoints))
+    const outputInterpolators = ['o0', 'o1', 'o2', 'o3'].map(label => createInterpolator(label, numberPoints))
+    const explanationInterpolators = labels.map(label => createInterpolator('e' + label, numberPoints))
+
+    for (let i = 0; i < numberSamples; i++) {
         const t = i / numberSamples
-        const input = labels.map(label => interpolate('i' + label, t))
-        const output = ['o0', 'o1', 'o2', 'o3'].map(label => interpolate(label, t))
+        const input = inputInterpolators.map(interpolate => interpolate(t))
+        const output = outputInterpolators.map(interpolate => interpolate(t))
         const outputSum = output.reduce((acc, value) => acc + value, 0)
         const normalizedOutput = output.map(value => value / outputSum)
-        const explanations = labels.map(label => interpolate('e' + label, t))
+        const explanations = explanationInterpolators.map(interpolate => interpolate(t))
 
-        data.push({ input, output: normalizedOutput, explanations })
+        data.push({input, output: normalizedOutput, explanations})
     }
-    return { sampleRate, labels, data }
+    return {sampleRate, labels, data}
 }
 
 export default loadEngagementData;

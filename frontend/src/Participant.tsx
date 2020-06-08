@@ -44,7 +44,7 @@ class Participant extends React.Component<{ videoURL: string; name: string }, { 
                     <VideoArea>
                         <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate} />
                         <UserInfoContainer>
-                            <UserInfo name={"John Doe"} engagementLevel={outputClass}></UserInfo>
+                            <UserInfo name={"John Doe"} engagementLevel={outputClass}/>
                         </UserInfoContainer>
                     </VideoArea>
                     <ExplanationsContainer labels={dataContainer.labels} dataPoint={dataPoint} />

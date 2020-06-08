@@ -97,6 +97,7 @@ function ExplanationsContainer(props: {
                             {
                                 ticks: {
                                     min: 0,
+                                    max: 1
                                 },
                             },
                         ],
