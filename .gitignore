@@ -136,3 +136,13 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+.idea
+
+### VisualStudioCode template
+.vscode
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
