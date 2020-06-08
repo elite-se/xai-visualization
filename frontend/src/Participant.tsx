@@ -3,6 +3,7 @@ import { Card, Elevation, Colors } from "@blueprintjs/core";
 import VideoFeed from "./VideoFeed";
 import ExplanationsContainer from "./ExplanationsContainer";
 import styled from "styled-components";
+import loadEngagementData from "./loadEngagementData";
 
 const ParticipantLayout = styled.div`
     width: 100%;
@@ -25,18 +26,30 @@ const Name = styled.h4`
     margin: 0;
 `;
 
-function Participant(props: { videoURL: string; name: string }) {
-    return (
-        <Card elevation={Elevation.TWO}>
-            <ParticipantLayout>
-                <VideoArea>
-                    <VideoFeed videoURL={props.videoURL} />
-                    <Name>{props.name}</Name>
-                </VideoArea>
-                <ExplanationsContainer />
-            </ParticipantLayout>
-        </Card>
-    );
+const dataContainer = loadEngagementData()
+
+class Participant extends React.Component<{ videoURL: string; name: string }, { currentTime: number }> {
+
+    state = { currentTime: 0 }
+
+    onTimeUpdate = (currentTime: number) => this.setState({ currentTime })
+
+    render () {
+        const { videoURL, name } = this.props
+        const { currentTime } = this.state
+        const dataPoint = dataContainer.data[Math.floor(currentTime * dataContainer.sampleRate)]
+        return (
+            <Card elevation={Elevation.TWO}>
+                <ParticipantLayout>
+                    <VideoArea>
+                        <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate}/>
+                        <Name>{name}</Name>
+                    </VideoArea>
+                    <ExplanationsContainer labels={dataContainer.labels} dataPoint={dataPoint}/>
+                </ParticipantLayout>
+            </Card>
+        );
+    }
 }
 
 export default Participant;

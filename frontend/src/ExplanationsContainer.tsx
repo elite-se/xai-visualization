@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { HorizontalBar } from "react-chartjs-2";
+import {HorizontalBar} from "react-chartjs-2";
 import { Colors } from "@blueprintjs/core";
 
 const Container = styled.div`
@@ -38,23 +38,23 @@ const Heading = styled.h3`
 
 const CHART_COLOR_PALETTE = [Colors.TURQUOISE4, Colors.INDIGO4, Colors.GOLD4, Colors.COBALT4];
 
-function ExplanationsContainer() {
+function ExplanationsContainer(props: { dataPoint: { input: number[], output: number[], explanations: number[] }, labels: string[] }) {
     return (
         <Container>
             <Heading>Confidence</Heading>
             <ConfidenceBox>
                 <ConfidenceValue>89.5%</ConfidenceValue> confident for "very engaged"
             </ConfidenceBox>
-            <Divider />
+            <Divider/>
             <Heading>Explanations</Heading>
             <HorizontalBar
                 data={{
-                    labels: ["Face", "Valence", "Arms Crossed", "Hands"],
+                    labels: props.labels,
                     datasets: [
                         {
                             label: "Testing Explanations",
                             backgroundColor: CHART_COLOR_PALETTE,
-                            data: [0.4, 0.2, 0.15, 0.1],
+                            data: props.dataPoint.explanations,
                         },
                     ],
                 }}

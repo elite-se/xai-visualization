@@ -1,4 +1,4 @@
-import React from "react";
+import React, {SyntheticEvent} from "react";
 import styled from "styled-components";
 
 const VideoContainer = styled.div`
@@ -33,10 +33,12 @@ const Placeholder = styled.h2`
     transform: translate(-50%, -50%);
 `;
 
-function VideoFeed(props: { videoURL: string }) {
+function VideoFeed(props: { videoURL: string, onTimeUpdate: (t: number) => void }) {
+    const onTimeUpdate = (event:SyntheticEvent<HTMLVideoElement>) => props.onTimeUpdate(event.currentTarget.currentTime)
+
     return (
         <VideoContainer>
-            <video controls muted autoPlay>
+            <video controls muted autoPlay onTimeUpdate={onTimeUpdate}>
                 <source src={props.videoURL} type="video/mp4" />
                 Your browser does not support HTML video.
             </video>
