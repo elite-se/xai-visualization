@@ -28,8 +28,8 @@ def plot(sessions):
                 axs[i].xaxis.set_major_formatter(formatter)
 
             axs[-1].yaxis.set_ticks([])
-            axs[-1].plot(np.arange(0, features.shape[0], 1), np.argmax(labels==1, axis=1))
-            axs[-1].set_ylabel("Engagement", rotation='horizontal', x=-10, va='center', ha='right', fontsize=8)
+            axs[-1].plot(np.arange(0, features.shape[0], 1), np.argmax(labels==1, axis=1), color='red')
+            axs[-1].set_ylabel("engagement", rotation='horizontal', x=-10, va='center', ha='right', fontsize=8)
             plt.show()
 
 if __name__ == "__main__":
