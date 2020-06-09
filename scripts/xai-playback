@@ -1,0 +1,59 @@
+#!/bin/env python
+
+import argparse
+from xai_visualization.config import Config
+from imutils.video import FileVideoStream
+from imutils.video import FPS
+import numpy as np
+import argparse
+import imutils
+import time
+import cv2
+from imutils.video import FPS
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("playback video")
+    parser.add_argument("--video", type=str, help="the video", required=True)
+    args = parser.parse_args()
+
+    fvs = FileVideoStream(args.video).start()
+    fps = FPS().start()
+
+    fig, ax = plt.subplots(1, 1)
+    ax.axis('off')
+    canvas = FigureCanvas(fig)
+    plt.ion()
+    x = np.linspace(0, 500)
+    y = x/2. + 100*np.sin(2.*np.pi*x/1200)
+    plt.plot(x, y, color='red')
+
+    while fvs.more():
+        frame = fvs.read()
+        frame = imutils.resize(frame, width=450)
+
+        overlay = np.zeros(frame.shape, dtype=np.uint8)
+
+        canvas.draw()
+        width, height = fig.get_size_inches() * fig.get_dpi()
+        img = np.fromstring(canvas.tostring_rgb(), dtype='uint8').reshape(
+            int(height), int(width), 3)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+        img = imutils.resize(img, width=frame.shape[1])
+        alpha = 0.5
+        beta = (1.0 - alpha)
+        print(img.shape)
+        print(frame.shape)
+        combined = cv2.addWeighted(img, alpha, frame, beta, 0.0)
+
+        cv2.imshow("combined", combined)
+        cv2.imshow("plot", img)
+
+        # cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()),
+        #            (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+        cv2.imshow("Frame", frame)
+        cv2.waitKey(int(1000/60))
+        fps.update()
