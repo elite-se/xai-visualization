@@ -1,5 +1,5 @@
-from tensorflow.python.keras import Sequential
-from tensorflow.python.keras.layers import Dense, Dropout
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Dropout
 
 def create_model():
     model = Sequential()
@@ -8,5 +8,5 @@ def create_model():
     model.add(Dense(512, activation='relu'))
     model.add(Dropout(0.25))
     model.add(Dense(264, activation='relu'))
-    model.add(Dense(4, activation='sigmoid'))
+    model.add(Dense(4))
     return model
