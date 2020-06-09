@@ -84,7 +84,10 @@ def train(config, dataset_path, model_path):
 
 
     model = create_dense_model()
-    model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate), loss=categorical_crossentropy, metrics=['accuracy'], experimental_run_tf_function=True)
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(lr=learning_rate), 
+        loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
+        metrics=['accuracy'])
     history = model.fit(train_data, 
                     epochs=epochs,
                     steps_per_epoch=steps_per_epoch,
