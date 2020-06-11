@@ -47,11 +47,13 @@ const loadEngagementData = () => {
     const numberSamples = Math.ceil(videoDuration * sampleRate)
     const numberPoints = Math.max(Math.floor(videoDuration / 5) * 2, 2) + 1 // Ca. alle 20 Sekunden neue Bezier Kurve
 
-    const data: { input: number[], output: number[], explanations: number[] }[] = []
+    const data: { input: number[], output: number[], explanations: number[][] }[] = []
 
     const inputInterpolators = labels.map(label => createInterpolator('i' + label, numberPoints))
-    const outputInterpolators = ['o0', 'o1', 'o2', 'o3'].map(label => createInterpolator(label, numberPoints))
-    const explanationInterpolators = labels.map(label => createInterpolator('e' + label, numberPoints))
+    const outputInterpolators = ['0o', '1o', '2o', '3o'].map(label => createInterpolator(label, numberPoints))
+    const explanationInterpolators = ['0e', '1e', '2e', '3e'].map(
+        group => labels.map(label => createInterpolator(group  + label, numberPoints))
+    )
 
     for (let i = 0; i < numberSamples; i++) {
         const t = i / numberSamples
@@ -59,7 +61,9 @@ const loadEngagementData = () => {
         const output = outputInterpolators.map(interpolate => interpolate(t))
         const outputSum = output.reduce((acc, value) => acc + value, 0)
         const normalizedOutput = output.map(value => value / outputSum)
-        const explanations = explanationInterpolators.map(interpolate => interpolate(t))
+        const explanations = explanationInterpolators.map(
+            interpolators => interpolators.map(interpolate => interpolate(t))
+        )
 
         data.push({input, output: normalizedOutput, explanations})
     }

@@ -62,7 +62,7 @@ const CHART_COLOR_PALETTE = [
 const engagement_labels = ["very engaged", "slightly engaged", "slightly unattentive", "very unattentive"];
 
 function ExplanationsContainer(props: {
-    dataPoint: { input: number[]; output: number[]; explanations: number[] };
+    dataPoint: { input: number[]; output: number[]; explanations: number[][] };
     labels: string[];
 }) {
     const { output, explanations } = props.dataPoint;
@@ -84,7 +84,7 @@ function ExplanationsContainer(props: {
                         {
                             label: "Testing Explanations",
                             backgroundColor: CHART_COLOR_PALETTE,
-                            data: explanations,
+                            data: explanations[strongestOutput],
                         },
                     ],
                 }}
