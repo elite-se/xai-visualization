@@ -18,6 +18,8 @@ setup(
         'tensorflow==1.15',
         'lime==0.2.0.0',
         'hickle==3.4.6',
-        'shap==0.35.0'
+        'shap==0.35.0',
+        'tqdm',
+        'lime==0.2.0.0'
     ]
 )

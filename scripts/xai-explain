@@ -7,6 +7,7 @@ import tensorflow as tf
 from xai_visualization.explainer.shap_explain import explain as shap_explain
 from xai_visualization.explainer.lime_explain import explain as lime_explain
 import json
+from json import encoder
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("explain the decisions of the model")
@@ -24,5 +25,6 @@ if __name__ == "__main__":
     elif args.explainer == 'shap':
         json_data = shap_explain(model, guy_features)
 
+    encoder.FLOAT_REPR = lambda o: format(o, '.4f')
     with open('data.json', 'w') as f:
         json.dump(json_data, f)
