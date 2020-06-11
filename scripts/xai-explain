@@ -25,6 +25,5 @@ if __name__ == "__main__":
     elif args.explainer == 'shap':
         json_data = shap_explain(model, guy_features)
 
-    encoder.FLOAT_REPR = lambda o: format(o, '.4f')
     with open('data.json', 'w') as f:
-        json.dump(json_data, f)
+        json.dump(json_data, f, separators=(',', ':'))
