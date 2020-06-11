@@ -6,6 +6,7 @@ from xai_visualization.util.load_data import load_features
 import tensorflow as tf
 from xai_visualization.explainer.shap_explain import explain as shap_explain
 from xai_visualization.explainer.lime_explain import explain as lime_explain
+import json
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("explain the decisions of the model")
@@ -19,7 +20,9 @@ if __name__ == "__main__":
     model = tf.keras.models.load_model(args.model)
 
     if args.explainer == 'lime':
-        lime_explain(model, guy_features)
-
+        json_data = lime_explain(model, guy_features)
     elif args.explainer == 'shap':
-        shap_explain(model, guy_features)
+        json_data = shap_explain(model, guy_features)
+
+    with open('data.json', 'w') as f:
+        json.dump(json_data, f)
