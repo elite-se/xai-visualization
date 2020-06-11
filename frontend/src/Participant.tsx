@@ -3,7 +3,7 @@ import { Card, Elevation, Colors } from "@blueprintjs/core";
 import VideoFeed from "./VideoFeed";
 import ExplanationsContainer from "./ExplanationsContainer";
 import styled from "styled-components";
-import loadEngagementData from "./loadEngagementData";
+import loadEngagementData, {DataContainerType} from "./loadEngagementData";
 import UserInfo from "./UserInfo";
 
 const ParticipantLayout = styled.div`
@@ -24,17 +24,21 @@ const UserInfoContainer = styled.div`
     margin: 0;
 `;
 
-const dataContainer = loadEngagementData();
+class Participant extends React.Component<{ videoURL: string; name: string }, { currentTime: number, loaded: boolean }> {
+    state = { currentTime: 0, loaded: false };
+    private dataContainer: DataContainerType | null = null;
 
-class Participant extends React.Component<{ videoURL: string; name: string }, { currentTime: number }> {
-    state = { currentTime: 0 };
+    async componentDidMount () {
+        this.dataContainer = await loadEngagementData()
+        this.setState({ loaded: true })
+    }
 
     onTimeUpdate = (currentTime: number) => this.setState({ currentTime });
 
     render() {
         const { videoURL } = this.props;
         const { currentTime } = this.state;
-        const dataPoint = dataContainer.data[Math.floor(currentTime * dataContainer.sampleRate)];
+        const dataPoint = this.dataContainer?.data[Math.floor(currentTime * this.dataContainer?.sampleRate)];
 
         const outputClass = dataPoint ? dataPoint.output.indexOf(Math.max(...dataPoint.output)) : 4;
 
@@ -47,7 +51,7 @@ class Participant extends React.Component<{ videoURL: string; name: string }, { 
                             <UserInfo name={"John Doe"} engagementLevel={outputClass}/>
                         </UserInfoContainer>
                     </VideoArea>
-                    {dataPoint && <ExplanationsContainer labels={dataContainer.labels} dataPoint={dataPoint} />}
+                    {dataPoint && <ExplanationsContainer labels={this.dataContainer?.labels || []} dataPoint={dataPoint} />}
                 </ParticipantLayout>
             </Card>
         );

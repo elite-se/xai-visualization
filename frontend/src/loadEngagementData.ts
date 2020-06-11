@@ -20,54 +20,67 @@ const createInterpolator = (label: string, numberPoints: number) => {
     }
 }
 
-const loadEngagementData = () => {
-    const sampleRate = 25
-    const videoDuration = 1140.52 // Sample video
-    const labels = [
-        '0 Valence from Face (emax)',
-        '1 face horizontal movement (emax)',
-        '2 face vertical movement (emax)',
-        '3 armscrossed',
-        '4 headtouch',
-        '5 distance left hand left hip',
-        '6 distance right hand right hip',
-        '7 left elbow y rotation',
-        '8 right elbow y rotation',
-        '9 hand in front of left hip',
-        '10 hand in front of right hip',
-        '11 left elbow x rotation',
-        '12 right elbow x rotation',
-        '13 standard deviation head x position',
-        '14 standard deviation head x rotation',
-        '15 voice activity',
-        '16 Skeleton overall activation',
-        '17 Skeleton energy global max'
-    ]
+type DataPointType = { input: number[], output: number[], explanations: number[][] }
 
-    const numberSamples = Math.ceil(videoDuration * sampleRate)
-    const numberPoints = Math.max(Math.floor(videoDuration / 5) * 2, 2) + 1 // Ca. alle 20 Sekunden neue Bezier Kurve
+export type DataContainerType = {
+    sampleRate: number,
+    labels: string[],
+    data: DataPointType[]
+}
 
-    const data: { input: number[], output: number[], explanations: number[][] }[] = []
+const loadEngagementData = async () => {
+    try {
+        const response = await fetch('https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/novice.video.mp4.json')
+        return response.json()
+    } catch (e) {
+        const sampleRate = 25
+        const videoDuration = 1140.52 // Sample video
+        const labels = [
+            '0 Valence from Face (emax)',
+            '1 face horizontal movement (emax)',
+            '2 face vertical movement (emax)',
+            '3 armscrossed',
+            '4 headtouch',
+            '5 distance left hand left hip',
+            '6 distance right hand right hip',
+            '7 left elbow y rotation',
+            '8 right elbow y rotation',
+            '9 hand in front of left hip',
+            '10 hand in front of right hip',
+            '11 left elbow x rotation',
+            '12 right elbow x rotation',
+            '13 standard deviation head x position',
+            '14 standard deviation head x rotation',
+            '15 voice activity',
+            '16 Skeleton overall activation',
+            '17 Skeleton energy global max'
+        ]
 
-    const inputInterpolators = labels.map(label => createInterpolator('i' + label, numberPoints))
-    const outputInterpolators = ['0o', '1o', '2o', '3o'].map(label => createInterpolator(label, numberPoints))
-    const explanationInterpolators = ['0e', '1e', '2e', '3e'].map(
-        group => labels.map(label => createInterpolator(group + label, numberPoints))
-    )
+        const numberSamples = Math.ceil(videoDuration * sampleRate)
+        const numberPoints = Math.max(Math.floor(videoDuration / 5) * 2, 2) + 1 // Ca. alle 20 Sekunden neue Bezier Kurve
 
-    for (let i = 0; i < numberSamples; i++) {
-        const t = i / numberSamples
-        const input = inputInterpolators.map(interpolate => interpolate(t))
-        const output = outputInterpolators.map(interpolate => interpolate(t))
-        const outputSum = output.reduce((acc, value) => acc + value, 0)
-        const normalizedOutput = output.map(value => value / outputSum)
-        const explanations = explanationInterpolators.map(
-            interpolators => interpolators.map(interpolate => interpolate(t))
+        const data: DataPointType[] = []
+
+        const inputInterpolators = labels.map(label => createInterpolator('i' + label, numberPoints))
+        const outputInterpolators = ['0o', '1o', '2o', '3o'].map(label => createInterpolator(label, numberPoints))
+        const explanationInterpolators = ['0e', '1e', '2e', '3e'].map(
+            group => labels.map(label => createInterpolator(group + label, numberPoints))
         )
 
-        data.push({input, output: normalizedOutput, explanations})
+        for (let i = 0; i < numberSamples; i++) {
+            const t = i / numberSamples
+            const input = inputInterpolators.map(interpolate => interpolate(t))
+            const output = outputInterpolators.map(interpolate => interpolate(t))
+            const outputSum = output.reduce((acc, value) => acc + value, 0)
+            const normalizedOutput = output.map(value => value / outputSum)
+            const explanations = explanationInterpolators.map(
+                interpolators => interpolators.map(interpolate => interpolate(t))
+            )
+
+            data.push({input, output: normalizedOutput, explanations})
+        }
+        return {sampleRate, labels, data}
     }
-    return {sampleRate, labels, data}
 }
 
 export default loadEngagementData;

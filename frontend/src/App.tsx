@@ -1,7 +1,7 @@
 import React from "react";
 import Participant from "./Participant";
 
-import { Icon, Navbar, NavbarGroup, NavbarHeading } from "@blueprintjs/core";
+import {Button, ButtonGroup, Icon, Navbar, NavbarDivider, NavbarGroup, NavbarHeading} from "@blueprintjs/core";
 import { IconNames } from "@blueprintjs/icons";
 import styled from "styled-components";
 
@@ -28,6 +28,10 @@ function App() {
                     <NavbarHeading>
                         <H3>XAI-Visualisations</H3>
                     </NavbarHeading>
+                    <NavbarDivider />
+                    <ButtonGroup>
+                        <Button icon='document-open' onClick={() => alert('tbd')}>Open...</Button>
+                    </ButtonGroup>
                 </NavbarGroup>
             </Navbar>
 
