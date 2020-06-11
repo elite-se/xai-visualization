@@ -1,5 +1,6 @@
 import {reduce} from "lodash"
 
+
 const createInterpolator = (label: string, numberPoints: number) => {
     // quadratic bezier based on label
     let seed = reduce(label.split(''), (acc: number, char: string) => acc + char.charCodeAt(0), 0)
@@ -28,9 +29,11 @@ export type DataContainerType = {
     data: DataPointType[]
 }
 
-const loadEngagementData = async () => {
+const loadEngagementData = async (username: string, password: string) => {
     try {
-        const response = await fetch('https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/novice.video.mp4.json')
+        const credentials = username + ':' + password
+        const response = await fetch('https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/expert.video.mp4.json',
+            { headers: { 'Authorization': 'Basic ' + window.btoa(credentials || '')}})
         return response.json()
     } catch (e) {
         const sampleRate = 25

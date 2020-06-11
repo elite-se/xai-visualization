@@ -20,7 +20,7 @@ function UserInfo(props: { name: string; engagementLevel: number }) {
     return (
         <InfoContainer>
             <Name>{props.name}</Name>
-            <EngagementLevelIndicator engagementLevel={props.engagementLevel}></EngagementLevelIndicator>
+            <EngagementLevelIndicator engagementLevel={props.engagementLevel}/>
         </InfoContainer>
     );
 }
