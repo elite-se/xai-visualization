@@ -16,15 +16,13 @@ def explain(model, samples):
         explanation = explainer.explain_instance(sample, probability_model.predict, top_labels=4, num_features=18)
        
         explanations = np.array([explanation.local_exp[i] for i in map(int, explanation.local_exp.keys())])
-        indices = explanations[:,:,0].astype(int)
-        indices = np.argsort(indices, axis=1)
+        indices = np.argsort(explanations[:,:,0].astype(int), axis=1)
         per_class_explanations = np.take_along_axis(explanations[:,:,1], indices, axis=1)
 
-        per_class_explanations = None
         data.append({
-            'input': sample,
-            'output': explanation.predict_proba,
-            'explanations': per_class_explanations
+            'input': sample.tolist(),
+            'output': explanation.predict_proba.tolist(),
+            'explanations': per_class_explanations.tolist()
         })
 
     json = { 
