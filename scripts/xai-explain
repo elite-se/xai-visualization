@@ -1,42 +1,25 @@
 #!/bin/env python
 
 import argparse
-from xai_visualization.config import Config
-import numpy as np
-import shap
-from xai_visualization.util.load_data import feature_names
+
 from xai_visualization.util.load_data import load_features
 import tensorflow as tf
-import pickle
-
-def explain(model, guy_features):
-    print
-    #explainer = shap.GradientExplainer(model, guy_features[:100])
-    #explainer = shap.KernelExplainer(model, guy_features[:100]) # Also not working
-    explainer = shap.DeepExplainer(model, guy_features[:100]) # Currently is not supported in TF2: https://github.com/slundberg/shap/issues/885#issuecomment-564778328
-    shap_values = explainer.shap_values(guy_features[:int(len(guy_features)/3)])
-
-    return shap_values
-
+from xai_visualization.explainer.shap_explain import explain as shap_explain
+from xai_visualization.explainer.lime_explain import explain as lime_explain
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("explain the decisions of the model")
     parser.add_argument("--model", type=str, help="the path to the model", required=True)
     parser.add_argument("--sessionpath", type=str, help="the path to the session which contains annotations", required=True)
+    parser.add_argument("--guy", type=str, choices=['expert', 'novice'], help="Either expert or novice", required=True)
+    parser.add_argument("--explainer", type=str, choices=['lime', 'shap'], help="Which explainer to use", required=True)
     args = parser.parse_args()
 
-    #tf.compat.v1.disable_eager_execution()
-
-    guy_features = load_features(args.sessionpath, 'novice')
+    guy_features = load_features(args.sessionpath, args.guy)
     model = tf.keras.models.load_model(args.model)
 
+    if args.explainer == 'lime':
+        lime_explain(model, guy_features)
 
-    shap_values = explain(model, guy_features)
-
-    pickle.dump(shap_values, "shap_values.pkl")
-
-    shap.summary_plot(
-        shap_values, guy_features, 
-        class_names=[str(i) for i in range(18)],
-        feature_names=feature_names
-    )
+    elif args.explainer == 'shap':
+        shap_explain(model, guy_features)
