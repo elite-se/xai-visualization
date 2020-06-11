@@ -5,7 +5,7 @@ from xai_visualization.util.load_data import feature_names
 from tqdm import tqdm
 
 def explain(model, samples):
-    samples = samples[:100]
+    #samples = samples[:100]
 
     background_dataset = samples[:1000]
     explainer = shap.DeepExplainer(model, background_dataset)
