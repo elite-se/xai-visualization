@@ -2,6 +2,7 @@ import shap
 import numpy as np
 import tensorflow as tf
 from xai_visualization.util.load_data import feature_names
+from tqdm import tqdm
 
 def explain(model, samples):
 
@@ -14,7 +15,7 @@ def explain(model, samples):
 
     data = []
 
-    for sample in samples:
+    for sample in tqdm(samples):
         # output format: [samples, classes, features(18)]
         per_class_explanations = np.squeeze(explainer.shap_values(np.array([sample])))
         data.append({
