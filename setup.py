@@ -2,8 +2,8 @@ from setuptools import find_packages, setup
 
 setup(
     name='xai-visualization',
-    packages=['xai_visualization', 'xai_visualization.models', 'xai_visualization.util', 'xai_visualization.prepare'],
-    scripts=['scripts/xai-train', 'scripts/xai-evaluation', 'scripts/xai-prepare', 'scripts/xai-plot', 'scripts/xai-explain', 'scripts/xai-playback'],
+    packages=['xai_visualization', 'xai_visualization.models', 'xai_visualization.util'],
+    scripts=['scripts/xai-train', 'scripts/xai-plot', 'scripts/xai-explain'],
     version='0.1.0',
     description='HCI solutions',
     author='maxammann',
