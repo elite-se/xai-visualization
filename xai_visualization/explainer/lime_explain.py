@@ -25,9 +25,9 @@ def explain(model, samples):
             explanations[:, :, 1], indices, axis=1)
 
         data.append({
-            'input': np.around(sample, 4).tolist(),
-            'output': np.around(explanation.predict_proba, 4).tolist(),
-            'explanations': np.around(per_class_explanations, 4).tolist()
+            'input': sample.tolist(),
+            'output': explanation.predict_proba.tolist(),
+            'explanations': per_class_explanations.tolist()
         })
 
     json = {
