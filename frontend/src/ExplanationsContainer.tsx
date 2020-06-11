@@ -59,7 +59,7 @@ const CHART_COLOR_PALETTE = [
     Colors.TURQUOISE5,
 ];
 
-const engagement_labels = ["very engaged", "slightly engaged", "slightly unattentive", "very unattentive"];
+const engagement_labels = ["very unattentive", "slightly unattentive", "slightly engaged", "very engaged"];
 
 function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };

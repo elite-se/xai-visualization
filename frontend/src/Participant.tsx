@@ -36,7 +36,7 @@ class Participant extends React.Component<{ videoURL: string; name: string }, { 
         const { currentTime } = this.state;
         const dataPoint = dataContainer.data[Math.floor(currentTime * dataContainer.sampleRate)];
 
-        const outputClass = dataPoint.output.indexOf(Math.max(...dataPoint.output));
+        const outputClass = dataPoint ? dataPoint.output.indexOf(Math.max(...dataPoint.output)) : 4;
 
         return (
             <Card elevation={Elevation.TWO}>
@@ -47,7 +47,7 @@ class Participant extends React.Component<{ videoURL: string; name: string }, { 
                             <UserInfo name={"John Doe"} engagementLevel={outputClass}/>
                         </UserInfoContainer>
                     </VideoArea>
-                    <ExplanationsContainer labels={dataContainer.labels} dataPoint={dataPoint} />
+                    {dataPoint && <ExplanationsContainer labels={dataContainer.labels} dataPoint={dataPoint} />}
                 </ParticipantLayout>
             </Card>
         );

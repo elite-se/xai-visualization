@@ -22,7 +22,7 @@ const createInterpolator = (label: string, numberPoints: number) => {
 
 const loadEngagementData = () => {
     const sampleRate = 25
-    const videoDuration = 596.503219 // BigBuckBunny
+    const videoDuration = 1140.52 // Sample video
     const labels = [
         '0 Valence from Face (emax)',
         '1 face horizontal movement (emax)',
