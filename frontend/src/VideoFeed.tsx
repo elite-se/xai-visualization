@@ -1,4 +1,4 @@
-import React, {SyntheticEvent} from "react";
+import React, { SyntheticEvent } from "react";
 import styled from "styled-components";
 
 const VideoContainer = styled.div`
@@ -7,7 +7,7 @@ const VideoContainer = styled.div`
 
     --video-width: 60vw;
 
-    width: var(--video-width);
+    width: 40vw;
     height: calc(var(--video-width) * 0.562); /* 16:9 video */
 
     position: relative;
@@ -17,7 +17,9 @@ const VideoContainer = styled.div`
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
+        width: var(--video-width);
+        height: calc(var(--video-width) * 0.562);
+        transform: translateX(-20%);
     }
 `;
 

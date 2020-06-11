@@ -60,50 +60,79 @@ const CHART_COLOR_PALETTE = [
 ];
 
 const engagement_labels = ["very unattentive", "slightly unattentive", "slightly engaged", "very engaged"];
+const barChartOptions = {
+    legend: {
+        display: false,
+    },
+    scales: {
+        xAxes: [
+            {
+                ticks: {
+                    min: 0,
+                    max: 1,
+                },
+            },
+        ],
+    },
+    tooltips: {
+        enabled: false,
+    },
+};
 
 function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };
     labels: string[];
 }) {
     const { output, explanations } = props.dataPoint;
-    const strongestOutput = output.indexOf(Math.max(...output));
-    const confidence = Math.round(output[strongestOutput] * 1000) / 10;
+    const strongestOutputIdx = output.indexOf(Math.max(...output));
+    const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
+
+    const nrOfDisplayedFeatures = 4;
+
+    const counterExampleIdx = strongestOutputIdx > 1 ? 0 : 3; //use "the other side of the scala" as a counter exmple
+
     return (
         <Container>
-            <Heading>Confidence</Heading>
-            <ConfidenceBox>
-                <ConfidenceValue>{`${confidence}%`}</ConfidenceValue>
-                {` confident for "${engagement_labels[strongestOutput]}".`}
-            </ConfidenceBox>
-            <Divider />
-            <Heading>Explanations</Heading>
-            <HorizontalBar
-                data={{
-                    labels: props.labels,
-                    datasets: [
-                        {
-                            label: "Testing Explanations",
-                            backgroundColor: CHART_COLOR_PALETTE,
-                            data: explanations[strongestOutput],
-                        },
-                    ],
-                }}
-                options={{
-                    legend: {
-                        display: false,
-                    },
-                    scales: {
-                        xAxes: [
+            <Heading>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
+            {confidence < 50 && (
+                <ConfidenceBox>
+                    {"Only "}
+                    <ConfidenceValue>{`${confidence}%`}</ConfidenceValue>
+                    {` confident for "${engagement_labels[strongestOutputIdx]}".`}
+                </ConfidenceBox>
+            )}
+            <div style={{ width: "60%" }}>
+                <HorizontalBar
+                    data={{
+                        labels: props.labels.slice(0, nrOfDisplayedFeatures),
+                        datasets: [
                             {
-                                ticks: {
-                                    min: 0,
-                                    max: 1
-                                },
+                                label: "Testing Explanations",
+                                backgroundColor: CHART_COLOR_PALETTE,
+                                data: explanations[strongestOutputIdx],
                             },
                         ],
-                    },
-                }}
-            />
+                    }}
+                    options={barChartOptions}
+                />
+            </div>
+            <Divider />
+            <Heading>Why not "{engagement_labels[counterExampleIdx]}"?</Heading>
+            <div>
+                <HorizontalBar
+                    data={{
+                        labels: props.labels.slice(0, 2),
+                        datasets: [
+                            {
+                                label: "Testing Explanations",
+                                backgroundColor: CHART_COLOR_PALETTE.slice(9),
+                                data: explanations[counterExampleIdx].slice(0, 2),
+                            },
+                        ],
+                    }}
+                    options={barChartOptions}
+                />
+            </div>
         </Container>
     );
 }
