@@ -25,5 +25,11 @@ if __name__ == "__main__":
     elif args.explainer == 'shap':
         json_data = shap_explain(model, guy_features)
 
+    def round_floats(o):
+        if isinstance(o, float): return round(o, 4)
+        if isinstance(o, dict): return {k: round_floats(v) for k, v in o.items()}
+        if isinstance(o, (list, tuple)): return [round_floats(x) for x in o]
+        return o
+
     with open('data.json', 'w') as f:
-        json.dump(json_data, f, separators=(',', ':'))
+        json.dump(round_floats(json_data), f, separators=(',', ':'))

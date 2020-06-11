@@ -5,7 +5,7 @@ from xai_visualization.util.load_data import feature_names
 from tqdm import tqdm
 
 def explain(model, samples):
-    #samples = samples[:100]
+    samples = samples[:100]
 
     background_dataset = samples[:1000]
     explainer = shap.DeepExplainer(model, background_dataset)
@@ -18,9 +18,9 @@ def explain(model, samples):
         # output format: [samples, classes, features(18)]
         per_class_explanations = np.squeeze(explainer.shap_values(np.array([sample])))
         data.append({
-            'input': np.around(sample, 4).tolist(),
-            'output': np.around(probability_model.predict(np.array([sample])), 4).tolist(),
-            'explanations': np.around(per_class_explanations, 4).tolist()
+            'input': np.array(sample).tolist(),
+            'output': np.array(probability_model.predict(np.array([sample]))[0]).tolist(),
+            'explanations': per_class_explanations.tolist()
         })
 
     json = {'sampleRate': 25,
