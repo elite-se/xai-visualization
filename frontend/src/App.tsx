@@ -70,9 +70,9 @@ class App extends React.Component<{}, StateType> {
                         <ButtonGroup>
                             <Button icon='document-open' onClick={() => alert('tbd')}>Open...</Button>
                         </ButtonGroup>
-                        <NavbarDivider/>
-                        <InputGroup placeholder='Username' onChange={this.onUsernameChange}/>
-                        <InputGroup placeholder='Password' onChange={this.onPasswordChange}/>
+                        <NavbarDivider />
+                        <InputGroup placeholder="Username" onChange={this.onUsernameChange} />
+                        <InputGroup placeholder="Password" type="password" onChange={this.onPasswordChange} />
                         <Button onClick={this.loadData}>Load data!</Button>
                     </NavbarGroup>
                 </Navbar>
