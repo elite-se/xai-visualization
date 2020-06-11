@@ -26,6 +26,6 @@ def explain(model, samples):
     json = {'sampleRate': 25,
             'labels': feature_names,
             'data': data
-            }
+    }
 
     return json
