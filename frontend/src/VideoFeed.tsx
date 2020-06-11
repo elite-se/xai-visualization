@@ -21,18 +21,6 @@ const VideoContainer = styled.div`
     }
 `;
 
-const Placeholder = styled.h2`
-    padding: 40px;
-    background: rgba(255, 120, 120, 0.5);
-    color: white;
-    font-weight: bold;
-
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-`;
-
 function VideoFeed(props: { videoURL: string, onTimeUpdate: (t: number) => void }) {
     const onTimeUpdate = (event:SyntheticEvent<HTMLVideoElement>) => props.onTimeUpdate(event.currentTarget.currentTime)
 
@@ -42,8 +30,6 @@ function VideoFeed(props: { videoURL: string, onTimeUpdate: (t: number) => void 
                 <source src={props.videoURL} type="video/mp4" />
                 Your browser does not support HTML video.
             </video>
-
-            <Placeholder>PLACEHOLDER VIDEO-FEED</Placeholder>
         </VideoContainer>
     );
 }

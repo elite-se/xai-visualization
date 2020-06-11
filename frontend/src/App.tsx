@@ -34,7 +34,7 @@ function App() {
             <Main>
                 <Participant
                     name="John Doe"
-                    videoURL="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                    videoURL="https://xn--ls8h.maxammann.org/066_2016-05-23_Augsburg/expert.video.mp4"
                 />
             </Main>
         </Container>
