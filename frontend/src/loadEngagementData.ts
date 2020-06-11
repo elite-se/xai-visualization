@@ -52,7 +52,7 @@ const loadEngagementData = () => {
     const inputInterpolators = labels.map(label => createInterpolator('i' + label, numberPoints))
     const outputInterpolators = ['0o', '1o', '2o', '3o'].map(label => createInterpolator(label, numberPoints))
     const explanationInterpolators = ['0e', '1e', '2e', '3e'].map(
-        group => labels.map(label => createInterpolator(group  + label, numberPoints))
+        group => labels.map(label => createInterpolator(group + label, numberPoints))
     )
 
     for (let i = 0; i < numberSamples; i++) {
