@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 def plot_train_history(history, title):
   loss = history.history['loss']
   val_loss = history.history['val_loss']
-  acc = history.history['accuracy']
-  val_acc = history.history['val_accuracy']
+  acc = history.history.get('accuracy', history.history.get('acc'))
+  val_acc = history.history.get('val_accuracy', history.history.get('val_acc'))
 
   epochs = range(len(loss))
 

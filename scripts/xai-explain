@@ -1,36 +1,35 @@
 #!/bin/env python
 
 import argparse
-from xai_visualization.config import Config
-from tensorflow import keras
-import numpy as np
-import shap
-from xai_visualization.train import prepare_dataset
-from xai_visualization.util.load_data import feature_names
+
+from xai_visualization.util.load_data import load_features
 import tensorflow as tf
-
-def explain(model):
-    data_train, labels_train, data_test, labels_test = prepare_dataset("data")
-    #explainer = shap.GradientExplainer(model, data_train[:100])
-    #explainer = shap.KernelExplainer(model, data_train[:100]) # Also not working
-    explainer = shap.DeepExplainer(model, data_train[:100]) # Currently is not supported in TF2: https://github.com/slundberg/shap/issues/885#issuecomment-564778328
-    shap_values = explainer.shap_values(data_train[:10])
-
-    shap.summary_plot(shap_values, data_train[:10], 
-    class_names=[str(i) for i in range(18)],
-    feature_names=feature_names)
-    #shap.force_plot(explainer.expected_value[0], shap_values[0][0,:], data_train[0,:], link="logit")
-
-
+from xai_visualization.explainer.shap_explain import explain as shap_explain
+from xai_visualization.explainer.lime_explain import explain as lime_explain
+import json
+from json import encoder
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("explain the decisions of the model")
     parser.add_argument("--model", type=str, help="the path to the model", required=True)
-    parser.add_argument("--config", type=str, help="the config", required=False)
+    parser.add_argument("--sessionpath", type=str, help="the path to the session which contains annotations", required=True)
+    parser.add_argument("--guy", type=str, choices=['expert', 'novice'], help="Either expert or novice", required=True)
+    parser.add_argument("--explainer", type=str, choices=['lime', 'shap'], help="Which explainer to use", required=True)
     args = parser.parse_args()
 
-    tf.compat.v1.disable_eager_execution()
-    
-    model = keras.models.load_model(args.model)
+    guy_features = load_features(args.sessionpath, args.guy)
+    model = tf.keras.models.load_model(args.model)
 
-    explain(model)
+    if args.explainer == 'lime':
+        json_data = lime_explain(model, guy_features)
+    elif args.explainer == 'shap':
+        json_data = shap_explain(model, guy_features)
+
+    def round_floats(o):
+        if isinstance(o, float): return round(o, 4)
+        if isinstance(o, dict): return {k: round_floats(v) for k, v in o.items()}
+        if isinstance(o, (list, tuple)): return [round_floats(x) for x in o]
+        return o
+
+    with open(args.sessionpath + '_data.json', 'w') as f:
+        json.dump(round_floats(json_data), f, separators=(',', ':'))

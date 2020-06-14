@@ -34,13 +34,15 @@ from tensorflow.keras.utils import to_categorical
 # 17 Skeleton energy global max
 
 
-def load_features(path):
+def load_features(subdir, guy):
+    path = os.path.join(subdir, guy + ".engagement_feature_set.stream~")
     features_file = open(path, "r")
     features = np.fromfile(features_file, dtype=np.float32)
     return features.reshape((int(features.shape[0] / 18), 18))
 
 
-def load_annotations(path):
+def load_annotations(subdir, guy):
+    path = os.path.join(subdir, guy + ".engagement.gold.annotation~")
     annotations = np.genfromtxt(path, delimiter=';', dtype=np.float32)
     # remove unnecessary confidence
     annotations = annotations[:, 0]
@@ -63,8 +65,8 @@ def load_folder(path):
 
         session = {}
         for guy in guys:
-            features = load_features(os.path.join(subdir, guy + ".engagement_feature_set.stream~"))
-            annotations = load_annotations(os.path.join(subdir, guy + ".engagement.gold.annotation~"))
+            features = load_features(subdir, guy)
+            annotations = load_annotations(subdir, guy)
             number_of_frames = min(features.shape[0], annotations.shape[0])
             annotations = annotations[:number_of_frames]
             features = features[:number_of_frames]
