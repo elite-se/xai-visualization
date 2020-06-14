@@ -31,5 +31,5 @@ if __name__ == "__main__":
         if isinstance(o, (list, tuple)): return [round_floats(x) for x in o]
         return o
 
-    with open('data.json', 'w') as f:
+    with open(args.sessionpath + '_data.json', 'w') as f:
         json.dump(round_floats(json_data), f, separators=(',', ':'))
