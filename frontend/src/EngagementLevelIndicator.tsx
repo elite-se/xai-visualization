@@ -2,7 +2,9 @@ import React from "react";
 import styled from "styled-components";
 import { Colors } from "@blueprintjs/core";
 
-const ENGAGEMENT_COLORS = [Colors.GREEN3, Colors.BLUE3, Colors.ORANGE3, Colors.RED3]; //assuming 0 is high engagement
+const ENGAGEMENT_COLORS = [Colors.RED3, Colors.ORANGE3, Colors.BLUE3, Colors.GREEN3]; //assuming 3 is highest engagement
+
+const UNKNOWN_COLOR = Colors.BLACK
 
 const Indicator = styled.div`
     width: 24px;
@@ -12,8 +14,10 @@ const Indicator = styled.div`
     box-sizing: border-box;
 `;
 
-function EngagementLevelIndicator(props: any) {
-    return <Indicator style={{ background: ENGAGEMENT_COLORS[props.engagementLevel] }}></Indicator>;
+function EngagementLevelIndicator(props: { engagementLevel: number }) {
+    return <Indicator style={{
+        background: props.engagementLevel === -1 ? UNKNOWN_COLOR : ENGAGEMENT_COLORS[props.engagementLevel]
+    }}/>;
 }
 
 export default EngagementLevelIndicator;

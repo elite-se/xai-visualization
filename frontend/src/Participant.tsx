@@ -1,9 +1,9 @@
 import React from "react";
-import { Card, Elevation, Colors } from "@blueprintjs/core";
+import {Card, Colors, Elevation} from "@blueprintjs/core";
 import VideoFeed from "./VideoFeed";
 import ExplanationsContainer from "./ExplanationsContainer";
 import styled from "styled-components";
-import loadEngagementData from "./loadEngagementData";
+import {DataContainerType} from "./loadEngagementData";
 import UserInfo from "./UserInfo";
 
 const ParticipantLayout = styled.div`
@@ -24,30 +24,29 @@ const UserInfoContainer = styled.div`
     margin: 0;
 `;
 
-const dataContainer = loadEngagementData();
+class Participant extends React.Component<{ videoURL: string; name: string, dataContainer: DataContainerType }, { currentTime: number }> {
+    state = {currentTime: 0};
 
-class Participant extends React.Component<{ videoURL: string; name: string }, { currentTime: number }> {
-    state = { currentTime: 0 };
-
-    onTimeUpdate = (currentTime: number) => this.setState({ currentTime });
+    onTimeUpdate = (currentTime: number) => this.setState({currentTime});
 
     render() {
-        const { videoURL } = this.props;
-        const { currentTime } = this.state;
-        const dataPoint = dataContainer.data[Math.floor(currentTime * dataContainer.sampleRate)];
+        const {videoURL, dataContainer} = this.props;
+        const {currentTime} = this.state;
+        const dataPoint = dataContainer?.data[Math.floor(currentTime * dataContainer?.sampleRate)];
 
-        const outputClass = dataPoint.output.indexOf(Math.max(...dataPoint.output));
+        const outputClass = dataPoint ? dataPoint.output.indexOf(Math.max(...dataPoint.output)) : 4;
 
         return (
             <Card elevation={Elevation.TWO}>
                 <ParticipantLayout>
                     <VideoArea>
-                        <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate} />
+                        <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate}/>
                         <UserInfoContainer>
                             <UserInfo name={"John Doe"} engagementLevel={outputClass}/>
                         </UserInfoContainer>
                     </VideoArea>
-                    <ExplanationsContainer labels={dataContainer.labels} dataPoint={dataPoint} />
+                    {dataPoint &&
+                    <ExplanationsContainer labels={dataContainer?.labels || []} dataPoint={dataPoint}/>}
                 </ParticipantLayout>
             </Card>
         );
