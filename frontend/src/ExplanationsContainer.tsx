@@ -60,13 +60,25 @@ const CHART_COLOR_PALETTE = [
 ];
 
 const engagement_labels = ["very unattentive", "slightly unattentive", "slightly engaged", "very engaged"];
-const barChartOptions = {
-    legend: {
-        display: false,
-    },
-    tooltips: {
-        enabled: false,
-    },
+const barChartOptions = (xAxesMax: number) => {
+    return {
+        legend: {
+            display: false,
+        },
+        tooltips: {
+            enabled: false,
+        },
+        scales: {
+            xAxes: [
+                {
+                    ticks: {
+                        min: 0,
+                        max: xAxesMax,
+                    },
+                },
+            ],
+        },
+    };
 };
 
 /**
@@ -147,6 +159,7 @@ const calculateBlur = (confidence: number) => {
 function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };
     labels: string[];
+    maxExplanationValue: number;
 }) {
     const { output, explanations } = props.dataPoint;
     const strongestOutputIdx = output.indexOf(Math.max(...output));
@@ -179,7 +192,7 @@ function ExplanationsContainer(props: {
                             },
                         ],
                     }}
-                    options={barChartOptions}
+                    options={barChartOptions(props.maxExplanationValue)}
                 />
             </div>
             <Divider />

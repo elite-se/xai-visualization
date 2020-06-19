@@ -1,9 +1,9 @@
 import React from "react";
-import {Card, Colors, Elevation} from "@blueprintjs/core";
+import { Card, Colors, Elevation } from "@blueprintjs/core";
 import VideoFeed from "./VideoFeed";
 import ExplanationsContainer from "./ExplanationsContainer";
 import styled from "styled-components";
-import {DataContainerType} from "./loadEngagementData";
+import { DataContainerType } from "./loadEngagementData";
 import UserInfo from "./UserInfo";
 
 const ParticipantLayout = styled.div`
@@ -24,14 +24,17 @@ const UserInfoContainer = styled.div`
     margin: 0;
 `;
 
-class Participant extends React.Component<{ videoURL: string; name: string, dataContainer: DataContainerType }, { currentTime: number }> {
-    state = {currentTime: 0};
+class Participant extends React.Component<
+    { videoURL: string; name: string; dataContainer: DataContainerType },
+    { currentTime: number }
+> {
+    state = { currentTime: 0 };
 
-    onTimeUpdate = (currentTime: number) => this.setState({currentTime});
+    onTimeUpdate = (currentTime: number) => this.setState({ currentTime });
 
     render() {
-        const {videoURL, dataContainer} = this.props;
-        const {currentTime} = this.state;
+        const { videoURL, dataContainer } = this.props;
+        const { currentTime } = this.state;
         const dataPoint = dataContainer?.data[Math.floor(currentTime * dataContainer?.sampleRate)];
 
         const outputClass = dataPoint ? dataPoint.output.indexOf(Math.max(...dataPoint.output)) : 4;
@@ -40,13 +43,18 @@ class Participant extends React.Component<{ videoURL: string; name: string, data
             <Card elevation={Elevation.TWO}>
                 <ParticipantLayout>
                     <VideoArea>
-                        <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate}/>
+                        <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate} />
                         <UserInfoContainer>
-                            <UserInfo name={"John Doe"} engagementLevel={outputClass}/>
+                            <UserInfo name={"John Doe"} engagementLevel={outputClass} />
                         </UserInfoContainer>
                     </VideoArea>
-                    {dataPoint &&
-                    <ExplanationsContainer labels={dataContainer?.labels || []} dataPoint={dataPoint}/>}
+                    {dataPoint && (
+                        <ExplanationsContainer
+                            labels={dataContainer?.labels || []}
+                            dataPoint={dataPoint}
+                            maxExplanationValue={dataContainer.maxExplanationValue}
+                        />
+                    )}
                 </ParticipantLayout>
             </Card>
         );
