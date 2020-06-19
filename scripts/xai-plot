@@ -2,7 +2,7 @@
 
 import argparse
 from xai_visualization.config import Config
-from xai_visualization.util.load_data import load_folder
+from xai_visualization.util.load_data import load_annotations, load_features
 from xai_visualization.util.load_data import feature_names
 import matplotlib.pyplot as plt
 import matplotlib as matplotlib
@@ -12,30 +12,38 @@ import time
 FREQUENCY = 25.
 
 
-def plot(sessions):
-    for session in sessions:
-        for (guy, (features, labels)) in session.items():
-            formatter = matplotlib.ticker.FuncFormatter(lambda ms, x: time.strftime('%M:%S', time.gmtime(ms)))
-            (fig, axs) = plt.subplots(features.shape[1] + 1, sharex=True)
-            fig.suptitle('Session from: ' + guy)
-            fig.tight_layout()
-            fig.subplots_adjust(left=0.2)
-            plt.xlim((0, features.shape[0] / FREQUENCY))
-            for i in range(len(feature_names)):
-                axs[i].set_ylabel(feature_names[i], rotation='horizontal', x=-10, va='center', ha='right', fontsize=8)
-                axs[i].yaxis.set_ticks([])
-                axs[i].plot(np.arange(0, features.shape[0], 1) / FREQUENCY, features[:, i])
-                axs[i].xaxis.set_major_formatter(formatter)
+def plot(session, guy):
+    samples = load_features(session, guy)
+    engagement = load_annotations(session, guy)
 
-            axs[-1].yaxis.set_ticks([])
-            axs[-1].plot(np.arange(0, features.shape[0], 1), np.argmax(labels==1, axis=1), color='red')
-            axs[-1].set_ylabel("engagement", rotation='horizontal', x=-10, va='center', ha='right', fontsize=8)
-            plt.show()
+    formatter = matplotlib.ticker.FuncFormatter(
+        lambda ms, x: time.strftime('%M:%S', time.gmtime(ms)))
+    (fig, axs) = plt.subplots(samples.shape[1] + 1, sharex=True)
+    fig.suptitle('Session from: ' + guy)
+    fig.tight_layout()
+    fig.subplots_adjust(left=0.2)
+    plt.xlim((0, samples.shape[0] / FREQUENCY))
+    for i in range(len(feature_names)):
+        axs[i].set_ylabel(feature_names[i], rotation='horizontal',
+                          x=-10, va='center', ha='right', fontsize=8)
+        axs[i].yaxis.set_ticks([])
+        axs[i].plot(np.arange(0, samples.shape[0], 1) /
+                    FREQUENCY, samples[:, i])
+        axs[i].xaxis.set_major_formatter(formatter)
+
+    axs[-1].yaxis.set_ticks([])
+    axs[-1].plot(np.arange(0, engagement.shape[0], 1), np.argmax(engagement==1, axis=1), color='red')
+    axs[-1].set_ylabel("engagement", rotation='horizontal',
+                       x=-10, va='center', ha='right', fontsize=8)
+    plt.show()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Plot feature set and annotation")
-    parser.add_argument("--raw_data", type=str, help="the raw data", default='data')
+    parser.add_argument("--session", type=str,
+                        help="the path to the session which contains annotations", required=True)
+    parser.add_argument(
+        "--guy", type=str, choices=['expert', 'novice'], help="Either expert or novice", required=True)
     args = parser.parse_args()
 
-    sessions = load_folder(args.raw_data)
-    plot(sessions)
+    plot(args.session, args.guy)
