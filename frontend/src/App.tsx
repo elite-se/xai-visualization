@@ -51,7 +51,7 @@ class App extends React.Component<{}, StateType> {
             return <Participant
                 dataContainer={dataContainer}
                 name="John Doe"
-                videoURL="https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/expert.video.mp4"
+                videoURL="https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/novice.video.mp4"
             />
         }
         return null
