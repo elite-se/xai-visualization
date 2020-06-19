@@ -12,12 +12,13 @@ from json import encoder
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("explain the decisions of the model")
     parser.add_argument("--model", type=str, help="the path to the model", required=True)
-    parser.add_argument("--sessionpath", type=str, help="the path to the session which contains annotations", required=True)
+    parser.add_argument("--session", type=str, help="the path to the session which contains annotations", required=True)
     parser.add_argument("--guy", type=str, choices=['expert', 'novice'], help="Either expert or novice", required=True)
     parser.add_argument("--explainer", type=str, choices=['lime', 'shap'], help="Which explainer to use", required=True)
+    parser.add_argument("--output", type=str, help="output path of the json", required=True)
     args = parser.parse_args()
 
-    guy_features = load_features(args.sessionpath, args.guy)
+    guy_features = load_features(args.session, args.guy)
     model = tf.keras.models.load_model(args.model)
 
     if args.explainer == 'lime':
@@ -31,5 +32,5 @@ if __name__ == "__main__":
         if isinstance(o, (list, tuple)): return [round_floats(x) for x in o]
         return o
 
-    with open(args.sessionpath + '_data.json', 'w') as f:
+    with open(args.output, 'w') as f:
         json.dump(round_floats(json_data), f, separators=(',', ':'))
