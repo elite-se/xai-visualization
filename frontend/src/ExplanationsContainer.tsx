@@ -14,25 +14,6 @@ const Container = styled.div`
     padding: 12px 8px;
 `;
 
-const Divider = styled.div`
-    width: 90%;
-    height: 1px;
-    background: ${Colors.GRAY4};
-    margin: 12px auto;
-`;
-
-const ConfidenceBox = styled.div`
-    border: 1px solid ${Colors.DARK_GRAY4};
-    box-sizing: border-box;
-    padding: 6px;
-`;
-
-const ConfidenceValue = styled.span`
-    font-weight: bold;
-    display: inline-block;
-    width: 45px;
-`;
-
 const Heading = styled.h3`
     margin: 0 0 6px 0;
     text-transform: uppercase;
@@ -139,22 +120,21 @@ function sortAndSelectTopmostFeatures(
 }
 
 const confidenceBlur = {
-    '100': 0,
-    '50': 0,
-    '30': 0,
-    '10': 0
-}
+    "100": 0,
+    "50": 0,
+    "30": 0,
+    "10": 0,
+};
 
 const calculateBlur = (confidence: number) => {
-    const entry = Object.entries(confidenceBlur)
-        .find(([percentage, blur]) => parseInt(percentage) >= confidence)
+    const entry = Object.entries(confidenceBlur).find(([percentage, blur]) => parseInt(percentage) >= confidence);
 
     if (!entry) {
-        return 0
+        return 0;
     }
 
     return entry[1];
-}
+};
 
 function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };
@@ -165,8 +145,6 @@ function ExplanationsContainer(props: {
     const strongestOutputIdx = output.indexOf(Math.max(...output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
 
-    const counterExampleIdx = strongestOutputIdx > 1 ? 0 : 3; //use "the other side of the scala" as a counter exmple
-
     const strongestOutputExplanations = sortAndSelectTopmostFeatures(
         props.labels,
         explanations[strongestOutputIdx],
@@ -175,12 +153,10 @@ function ExplanationsContainer(props: {
         true
     );
 
-    const counterExample = sortAndSelectTopmostFeatures(props.labels, explanations[counterExampleIdx], 2, 0.2, false);
-
     return (
         <Container>
             <Heading>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
-            <div style={{ width: "60%", filter: "blur(" + calculateBlur(confidence) +"px)" }}>
+            <div style={{ width: "60%", filter: "blur(" + calculateBlur(confidence) + "px)" }}>
                 <HorizontalBar
                     data={{
                         labels: strongestOutputExplanations.topMostLabels,
@@ -193,23 +169,6 @@ function ExplanationsContainer(props: {
                         ],
                     }}
                     options={barChartOptions(props.maxExplanationValue)}
-                />
-            </div>
-            <Divider />
-            <Heading>Why not "{engagement_labels[counterExampleIdx]}"?</Heading>
-            <div style={{ filter: "blur(" + calculateBlur(confidence) +"px)" }}>
-                <HorizontalBar
-                    data={{
-                        labels: counterExample.topMostLabels,
-                        datasets: [
-                            {
-                                label: "Testing Explanations",
-                                backgroundColor: CHART_COLOR_PALETTE.slice(9),
-                                data: counterExample.topMostFeatures,
-                            },
-                        ],
-                    }}
-                    options={barChartOptions}
                 />
             </div>
         </Container>
