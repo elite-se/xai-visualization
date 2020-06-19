@@ -48,7 +48,7 @@ const smoothData = (data: DataPointType[], windowSize: number): DataPointType[] 
 const loadEngagementData = async (username: string, password: string) => {
     try {
         const credentials = username + ':' + password
-        const response = await fetch('https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/expert.video.mp4.json',
+        const response = await fetch('https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/lime-expert.video.mp4.json',
             {headers: {'Authorization': 'Basic ' + window.btoa(credentials || '')}})
         const dataContainer: DataContainerType = await response.json()
         const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate
