@@ -126,6 +126,24 @@ function sortAndSelectTopmostFeatures(
     };
 }
 
+const confidenceBlur = {
+    '100': 0,
+    '50': 0,
+    '30': 0,
+    '10': 0
+}
+
+const calculateBlur = (confidence: number) => {
+    const entry = Object.entries(confidenceBlur)
+        .find(([percentage, blur]) => parseInt(percentage) >= confidence)
+
+    if (!entry) {
+        return 0
+    }
+
+    return entry[1];
+}
+
 function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };
     labels: string[];
@@ -149,14 +167,7 @@ function ExplanationsContainer(props: {
     return (
         <Container>
             <Heading>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
-            {confidence < 50 && (
-                <ConfidenceBox>
-                    {"Only "}
-                    <ConfidenceValue>{`${confidence}%`}</ConfidenceValue>
-                    {` confident for "${engagement_labels[strongestOutputIdx]}".`}
-                </ConfidenceBox>
-            )}
-            <div style={{ width: "60%" }}>
+            <div style={{ width: "60%", filter: "blur(" + calculateBlur(confidence) +"px)" }}>
                 <HorizontalBar
                     data={{
                         labels: strongestOutputExplanations.topMostLabels,
@@ -173,7 +184,7 @@ function ExplanationsContainer(props: {
             </div>
             <Divider />
             <Heading>Why not "{engagement_labels[counterExampleIdx]}"?</Heading>
-            <div>
+            <div style={{ filter: "blur(" + calculateBlur(confidence) +"px)" }}>
                 <HorizontalBar
                     data={{
                         labels: counterExample.topMostLabels,
