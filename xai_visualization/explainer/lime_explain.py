@@ -31,9 +31,12 @@ def explain(model, samples):
     probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
 
     predictions = probability_model.predict(np.array(samples))
+    i = 0
 
     def predict(sample):
-        return predictions.pop(0)
+        global i
+        i += 1
+        return predictions[i]
 
     data = []
 
