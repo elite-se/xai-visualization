@@ -1,4 +1,5 @@
 import generateMockData from "./generateMockData";
+import {uniq} from 'lodash'
 
 export type DataPointType = { input: number[]; output: number[]; explanations: number[][] };
 
@@ -6,7 +7,7 @@ export type DataContainerType = {
     sampleRate: number;
     labels: string[];
     data: DataPointType[];
-    maxExplanationValue: number;
+    maxExplanationValue?: number;
 };
 
 const AVG_WINDOW_SECONDS = 10; // Moving Average Window Size in seconds
@@ -24,7 +25,7 @@ const smoothData = (data: DataPointType[], windowSize: number): DataPointType[] 
             const smoothedInput = data[i].input.map((val, j) => (smoothedData[i - 1].input[j] * i + val) / (i + 1));
             const smoothedOutput = data[i].output.map((val, j) => (smoothedData[i - 1].output[j] * i + val) / (i + 1));
 
-            smoothedData[i] = { explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput };
+            smoothedData[i] = {explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput};
         } else {
             // Formula: smoothedData[i - 1] + (data[i] - data[i-windowSize]) / windowSize
             const smoothedExplanations = data[i].explanations.map((row, j) =>
@@ -41,7 +42,7 @@ const smoothData = (data: DataPointType[], windowSize: number): DataPointType[] 
                 (val, j) => smoothedData[i - 1].output[j] + (val - data[i - windowSize].output[j]) / windowSize
             );
 
-            smoothedData[i] = { explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput };
+            smoothedData[i] = {explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput};
         }
     }
     return smoothedData;
@@ -62,17 +63,136 @@ const maxExplanationsValue = (data: DataPointType[]) => {
     return max;
 };
 
+
+const categorize = (oldData: DataContainerType, mapping: FeatureCategoryTextMapping[]): DataContainerType => {
+    const labels = uniq(oldData.labels.map((label: string) => {
+        const foundMapping = mapping.find(mapping => mapping.features.includes(label))
+        if (!foundMapping) {
+            console.error("There is no category for feature " + label)
+            throw Error()
+        }
+        return foundMapping.id;
+    }))
+    const newData: DataContainerType = {
+        sampleRate: oldData.sampleRate,
+        labels: labels,
+        data: oldData.data.map(dataPoint => {
+            const newExplanations = []
+            for (const clazz of dataPoint.explanations) {
+                const newClazz = []
+                for (const info of mapping) {
+                    newClazz.push(
+                        info.aggregateFunction(
+                            clazz.filter((explanation, index) => info.features.includes(oldData.labels[index]))
+                        )
+                    );
+                }
+                newExplanations.push(newClazz)
+            }
+
+            const newInput = []
+            for (const info of mapping) {
+                newInput.push(
+                    info.aggregateFunction(
+                        dataPoint.input.filter((explanation, index) => info.features.includes(oldData.labels[index]))
+                    )
+                );
+            }
+
+
+            const newDataPoint: DataPointType = {
+                input: newInput,
+                output: dataPoint.output,
+                explanations: newExplanations
+            }
+            return newDataPoint;
+        })
+    }
+
+    newData.maxExplanationValue = maxExplanationsValue(newData.data)
+
+    return newData
+}
+
+interface FeatureCategoryTextMapping {
+    id: string;
+    features: string[];
+    aggregateFunction: ((featureValues: number[]) => number)
+}
+
+
+const average = (featureValues: number[]) => {
+    return featureValues.reduce((acc, value) => acc + value, 0) / featureValues.length
+}
+
+const featuresToCategoryMapping: FeatureCategoryTextMapping[] = [
+    {
+        id: "Gaze",
+        features: ['1 face horizontal movement (emax)',
+            '2 face vertical movement (emax)'],
+        aggregateFunction: average
+    },
+    {
+        id: "Smile",
+        features: ['0 Valence from Face (emax)'],
+        aggregateFunction: average
+    },
+    {
+        id: "Voice",
+        features: ['15 voice activity'],
+        aggregateFunction: average
+    },
+    {
+        id: "Armscrossed",
+        features: ['3 armscrossed'],
+        aggregateFunction: average
+    },
+    {
+        id: "Headtouch",
+        features: ['4 headtouch'],
+        aggregateFunction: average
+    },
+    {
+        id: "BodyOpenness",
+        features: ['5 distance left hand left hip',
+            '6 distance right hand right hip',
+            '9 hand in front of left hip',
+            '10 hand in front of right hip'],
+        aggregateFunction: average
+    },
+    {
+        id: "Restlessness",
+        features: ['16 Skeleton overall activation'],
+        aggregateFunction: average,
+    },
+    {
+        id: "Gesticulation",
+        features: ['17 Skeleton energy global max'],
+        aggregateFunction: average
+    },
+    {
+        id: "Undefined",
+        features: ['7 left elbow y rotation',
+            '8 right elbow y rotation',
+            '11 left elbow x rotation',
+            '12 right elbow x rotation',
+            '13 standard deviation head x position',
+            '14 standard deviation head x rotation',],
+        aggregateFunction: average
+    },
+]
+
 const loadEngagementData = async (username: string, password: string, dataURL: string) => {
     try {
         const credentials = username + ":" + password;
         const response = await fetch(dataURL, {
-            headers: { Authorization: "Basic " + window.btoa(credentials || "") },
+            headers: {Authorization: "Basic " + window.btoa(credentials || "")},
         });
         const dataContainer: DataContainerType = await response.json();
         const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate;
         dataContainer.data = smoothData(dataContainer.data, windowSize);
         dataContainer.maxExplanationValue = maxExplanationsValue(dataContainer.data);
-        return dataContainer;
+        return categorize(dataContainer, featuresToCategoryMapping);
     } catch (e) {
         console.error("Error loading or smoothing data. Using mocks");
         return generateMockData() as DataContainerType;

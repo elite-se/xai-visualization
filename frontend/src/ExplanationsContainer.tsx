@@ -46,6 +46,11 @@ const CHART_COLOR_PALETTE = [
 const engagement_labels = ["very unattentive", "slightly unattentive", "slightly engaged", "very engaged"];
 const barChartOptions = (xAxesMax: number) => {
     return {
+        layout: {
+            padding: {
+                left: 220
+            }
+        },
         legend: {
             display: false,
         },
@@ -58,9 +63,25 @@ const barChartOptions = (xAxesMax: number) => {
                     ticks: {
                         min: 0,
                         max: xAxesMax,
+                        callback: function (value: number, index: any, values: any) {
+                            if (value === 0) {
+                                return 'Not important';
+                            } else if (value === xAxesMax) {
+                                return 'Significantly important';
+                            }
+                            return undefined
+                        }
                     },
                 },
             ],
+            yAxes: [
+                {
+                    ticks: {
+                        mirror: true,
+                        padding: 220
+                    }
+                }
+            ]
         },
     };
 };
@@ -179,7 +200,7 @@ function ExplanationsContainer(props: {
     return (
         <Container>
             <Heading style={{filter: `blur(${blur}px)`}}>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
-            <ChartContainer style={{filter: `blur(${blur}px)`}}>
+            <ChartContainer style={{width: '90%', filter: `blur(${blur}px)`}}>
                 {props.mode === 'bar'
                     ? <HorizontalBar
                         data={{
