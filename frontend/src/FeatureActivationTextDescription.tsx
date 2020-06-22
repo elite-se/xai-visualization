@@ -7,7 +7,7 @@ const MainActivation = styled.span`
     white-space: pre;
     border-bottom: 2px solid ${Colors.BLUE5};
 
-    &:hover {
+    &.allowHover:hover {
         border-bottom: 3px solid ${Colors.BLUE4}88;
         cursor: pointer;
     }
@@ -38,6 +38,7 @@ function FeatureActivationTextDescription(props: {
     categoryValues: number[];
     username: string;
     userGender: Gender;
+    popOverDisabled: boolean;
 }) {
     const categoryActivationsObject = generateDescriptionObject(
         props.categoryIds,
@@ -69,8 +70,11 @@ function FeatureActivationTextDescription(props: {
                     interactionKind={PopoverInteractionKind.HOVER}
                     hoverOpenDelay={50}
                     hoverCloseDelay={50}
+                    disabled={props.popOverDisabled}
                 >
-                    <MainActivation>{activation.mainActivationAsText}</MainActivation>
+                    <MainActivation className={props.popOverDisabled ? "" : "allowHover"}>
+                        {activation.mainActivationAsText}
+                    </MainActivation>
                     {contextDialogContent}
                 </Popover>
                 {activation.suffix}
@@ -86,7 +90,7 @@ function FeatureActivationTextDescription(props: {
     }
 
     return (
-        <p style={{ fontSize: "1.1rem" }}>
+        <p style={{ fontSize: "1.1rem", margin: 0 }}>
             {categoryActivationsObject.username} {activationSpans}.
         </p>
     );

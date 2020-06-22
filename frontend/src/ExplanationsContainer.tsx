@@ -5,6 +5,12 @@ import { Colors } from "@blueprintjs/core";
 import WordCloud from "./WordCloud";
 import FeatureActivationTextDescription from "./FeatureActivationTextDescription";
 import { Gender } from "./FeaturesToTextMapping";
+import {
+    ENGAGEMENT_LABELS,
+    ENGAGEMENT_COLORS,
+    ENGAGEMENT_POSITIVE_COLOR_PALETTE,
+    ENGAGEMENT_NEGATIVE_COLOR_PALETTE,
+} from "./EngagementDefinitions";
 
 const Container = styled.div`
     position: relative;
@@ -15,37 +21,41 @@ const Container = styled.div`
     align-items: center;
 
     box-sizing: border-box;
-    padding: 12px 8px;
+    padding: 12px 16px;
 `;
 
-const Heading = styled.h3`
+const Heading = styled.div`
+    display: flex;
+    align-items: center;
+    padding: 4px 6px;
+    border: 2px solid ${Colors.LIGHT_GRAY2}55;
     margin: 0 0 6px 0;
-    text-transform: uppercase;
     transition: 0.2s filter linear, 0.2s -webkit-filter linear;
+
+    p {
+        margin: 0;
+    }
+
+    .classification {
+        text-transform: uppercase;
+        margin: 0;
+        margin-left: 4px;
+    }
 `;
 
-const CHART_COLOR_PALETTE = [
-    Colors.ROSE3,
-    Colors.ROSE4,
-    Colors.ROSE5,
-    Colors.VIOLET3,
-    Colors.VIOLET4,
-    Colors.VIOLET5,
-    Colors.INDIGO3,
-    Colors.INDIGO4,
-    Colors.INDIGO5,
-    Colors.COBALT3,
-    Colors.COBALT4,
-    Colors.COBALT5,
-    Colors.BLUE3,
-    Colors.BLUE4,
-    Colors.BLUE5,
-    Colors.TURQUOISE3,
-    Colors.TURQUOISE4,
-    Colors.TURQUOISE5,
-];
+const BasedOn = styled.div`
+    align-self: start;
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    transition: 0.2s filter linear, 0.2s -webkit-filter linear;
 
-const engagement_labels = ["very unattentive", "slightly unattentive", "slightly engaged", "very engaged"];
+    h4 {
+        margin: 0;
+        margin-right: 6px;
+    }
+`;
+
 const barChartOptions = (xAxesMax: number) => {
     return {
         layout: {
@@ -62,6 +72,7 @@ const barChartOptions = (xAxesMax: number) => {
         scales: {
             xAxes: [
                 {
+                    position: "top",
                     ticks: {
                         min: 0,
                         max: xAxesMax,
@@ -215,10 +226,24 @@ function ExplanationsContainer(props: {
     );
 
     const blur = calculateBlur(confidence);
+    const colorPalette = strongestOutputIdx < 2 ? ENGAGEMENT_NEGATIVE_COLOR_PALETTE : ENGAGEMENT_POSITIVE_COLOR_PALETTE;
 
     return (
         <Container>
-            <Heading style={{ filter: `blur(${blur}px)` }}>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
+            <Heading style={{ filter: `blur(${blur}px)`, borderColor: ENGAGEMENT_COLORS[strongestOutputIdx] }}>
+                <p>The AI detects: </p>
+                <h3 className="classification">{ENGAGEMENT_LABELS[strongestOutputIdx]}</h3>
+            </Heading>
+            <BasedOn style={{ filter: `blur(${blur}px)` }}>
+                <h4>Based on: </h4>
+                <FeatureActivationTextDescription
+                    categoryIds={strongestOutputExplanations.topMostLabels}
+                    categoryValues={strongestOutputExplanations.topMostInputs}
+                    username={props.username}
+                    userGender={Gender.MALE}
+                    popOverDisabled={blur > 0}
+                ></FeatureActivationTextDescription>
+            </BasedOn>
             <ChartContainer style={{ width: "90%", filter: `blur(${blur}px)` }}>
                 {props.mode === "bar" ? (
                     <HorizontalBar
@@ -227,7 +252,7 @@ function ExplanationsContainer(props: {
                             datasets: [
                                 {
                                     label: "Testing Explanations",
-                                    backgroundColor: CHART_COLOR_PALETTE,
+                                    backgroundColor: colorPalette,
                                     data: strongestOutputExplanations.topMostExplanations,
                                 },
                             ],
@@ -240,15 +265,10 @@ function ExplanationsContainer(props: {
                         maxExplanationValue={props.maxExplanationValue}
                         strongestFeatures={strongestOutputExplanations.topMostExplanations}
                         strongestLabels={strongestOutputExplanations.topMostLabels}
+                        colorPalette={colorPalette}
                     />
                 )}
             </ChartContainer>
-            <FeatureActivationTextDescription
-                categoryIds={strongestOutputExplanations.topMostLabels}
-                categoryValues={strongestOutputExplanations.topMostInputs}
-                username={props.username}
-                userGender={Gender.MALE}
-            ></FeatureActivationTextDescription>
             <Unsure style={{ opacity: blur > 0 ? 1 : 0 }}>UNSURE</Unsure>
         </Container>
     );

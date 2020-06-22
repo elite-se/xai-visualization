@@ -1,8 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Colors } from "@blueprintjs/core";
-
-const ENGAGEMENT_COLORS = [Colors.RED3, Colors.ORANGE3, Colors.TURQUOISE2, Colors.GREEN5]; //assuming 3 is highest engagement
+import { ENGAGEMENT_COLORS } from "./EngagementDefinitions";
 
 const UNKNOWN_COLOR = Colors.BLACK;
 
