@@ -73,6 +73,7 @@ const barChartOptions = (xAxesMax: number) => {
                             }
                             return undefined;
                         },
+                        fontSize: 16,
                     },
                 },
             ],
@@ -81,6 +82,8 @@ const barChartOptions = (xAxesMax: number) => {
                     ticks: {
                         mirror: true,
                         padding: 220,
+                        fontSize: 16,
+                        fontStyle: "bold",
                     },
                 },
             ],
@@ -93,6 +96,7 @@ const barChartOptions = (xAxesMax: number) => {
  * returns all values and their labels that are (in value, regardless of sign) greater than the threshold.
  * It returns at least minNrOfFeatures values, in case that too little values are greater than the threshold.
  * @param labels
+ * @param inputs_in
  * @param explanations_in
  * @param minNrOfFeatures
  * @param threshold
@@ -100,14 +104,16 @@ const barChartOptions = (xAxesMax: number) => {
  */
 function sortAndSelectTopmostFeatures(
     labels: string[],
+    inputs_in: number[],
     explanations_in: number[],
     minNrOfFeatures: number,
     threshold: number,
     sortDescending: boolean
-): { topMostLabels: string[]; topMostFeatures: number[] } {
+): { topMostLabels: string[]; topMostExplanations: number[]; topMostInputs: number[] } {
     if (explanations_in.length !== labels.length) throw new Error();
 
     let explanations = explanations_in.slice(0);
+    let inputs = inputs_in.slice(0);
     let labelOrder = Array.from(Array(explanations.length).keys()).sort((a, b) => explanations[a] - explanations[b]);
     explanations.sort((a, b) => a - b);
 
@@ -135,13 +141,16 @@ function sortAndSelectTopmostFeatures(
     }
 
     let topMostLables = [];
+    let topMostInputs = [];
     for (let i = 0; i < ctr; i++) {
         topMostLables.push(labels[labelOrder[i]]);
+        topMostInputs.push(inputs[labelOrder[i]]);
     }
 
     return {
         topMostLabels: topMostLables,
-        topMostFeatures: explanations.slice(0, ctr),
+        topMostExplanations: explanations.slice(0, ctr),
+        topMostInputs: topMostInputs,
     };
 }
 
@@ -192,12 +201,13 @@ function ExplanationsContainer(props: {
     mode: "bar" | "cloud";
     username: string;
 }) {
-    const { output, explanations } = props.dataPoint;
+    const { input, output, explanations } = props.dataPoint;
     const strongestOutputIdx = output.indexOf(Math.max(...output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
 
     const strongestOutputExplanations = sortAndSelectTopmostFeatures(
         props.labels,
+        input,
         explanations[strongestOutputIdx],
         3,
         0.2,
@@ -218,7 +228,7 @@ function ExplanationsContainer(props: {
                                 {
                                     label: "Testing Explanations",
                                     backgroundColor: CHART_COLOR_PALETTE,
-                                    data: strongestOutputExplanations.topMostFeatures,
+                                    data: strongestOutputExplanations.topMostExplanations,
                                 },
                             ],
                         }}
@@ -228,14 +238,14 @@ function ExplanationsContainer(props: {
                     <WordCloud
                         allLabels={props.labels}
                         maxExplanationValue={props.maxExplanationValue}
-                        strongestFeatures={strongestOutputExplanations.topMostFeatures}
+                        strongestFeatures={strongestOutputExplanations.topMostExplanations}
                         strongestLabels={strongestOutputExplanations.topMostLabels}
                     />
                 )}
             </ChartContainer>
             <FeatureActivationTextDescription
                 categoryIds={strongestOutputExplanations.topMostLabels}
-                categoryValues={strongestOutputExplanations.topMostFeatures}
+                categoryValues={strongestOutputExplanations.topMostInputs}
                 username={props.username}
                 userGender={Gender.MALE}
             ></FeatureActivationTextDescription>

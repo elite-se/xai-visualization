@@ -1,10 +1,14 @@
 export interface CategoryActivationAsText {
     categoryId: string;
-    activationAsText: string;
+    prefix: string;
+    mainActivationAsText: string;
+    suffix: string;
 }
 
 export interface CategoryValueDescription {
     username: string;
+    connector: string;
+    lastConnector: string;
     categoryActivations: CategoryActivationAsText[];
 }
 
@@ -33,6 +37,7 @@ interface FeatureCategoryTextMapping {
 
 interface FeatureCategoryDefinition {
     id: string;
+    emoji: string;
     definition: string;
 }
 
@@ -108,40 +113,48 @@ export const CATEGORY_IDS: string[] = featuresToTextMapping.map((f) => f.id);
 export const CATEGORY_DEFINITIONS: FeatureCategoryDefinition[] = [
     {
         id: "Gaze",
+        emoji: "👀",
         definition:
             "Measures wether the person is actievly looking at their camera/screen or somewhere else. People who look somewhere else tend to be less engaged.",
     },
     {
         id: "Smile",
+        emoji: "🙂",
         definition:
             "Detects the tendency of facial expression. The “happier” a person is, the more engaged they usually are.",
     },
     {
         id: "Voice",
+        emoji: "🗣",
         definition: "Measures how actively the person is speaking.",
     },
     {
         id: "Armscrossed",
+        emoji: "🙅",
         definition:
             "Detects whether a person has their arms crossed or not. Crossed arms are a strong indicator for low engagement.",
     },
     {
         id: "Headtouch",
+        emoji: "🤦",
         definition:
             "Detects whether a person is touching their head. This can also happen for example when they are speaking on a phone.",
     },
     {
         id: "BodyOpenness",
+        emoji: "🕺",
         definition:
             "Detects how open a person’s body language is. The more open someone is the more engaged they tend to be.",
     },
     {
         id: "Restlessness",
+        emoji: "🤸",
         definition:
             "Detects how restless a person is, i.e. how much they are pacing or moving around. This can be a sign of engagement or disengagement, depending on other factors, such as their voice activity.",
     },
     {
         id: "Gesticulation",
+        emoji: "👋",
         definition:
             "Detects how vividly a person is gesticulating. A lot of gesticulation is usually paired with the person talking.",
     },
@@ -155,18 +168,21 @@ export const CATEGORY_DEFINITIONS: FeatureCategoryDefinition[] = [
  * @param literals
  */
 const activationLiteral = (activation: number, literals: string[]) => {
-    let index = Math.max(0, Math.round(activation * literals.length) - 1);
+    let index = Math.min(Math.max(0, Math.round(activation * literals.length) - 1), literals.length - 1);
+    if (literals[index] === undefined) console.error("Literal is undefined", activation, index, literals);
     return literals[index];
 };
 
 const activationClause = (category: FeatureCategoryTextMapping, activationValue: number, gender: Gender) => {
-    return (
-        (category.multiplicity === FeatureCategoryMultiplicity.SINGULAR ? "is " : "are ") +
-        activationLiteral(activationValue, category.textRepresentations).replace(
+    if (activationValue > 1 || activationValue < 0)
+        console.error("Activation is not between 0 and 1!", category.id, activationValue);
+    return {
+        activationClausePrefix: category.multiplicity === FeatureCategoryMultiplicity.SINGULAR ? "is " : "are ",
+        activationClauseMain: activationLiteral(activationValue, category.textRepresentations).replace(
             "$gender",
             genderClause(category.type, gender, true)
-        )
-    );
+        ),
+    };
 };
 
 const categoryClause = (category: FeatureCategoryTextMapping) => {
@@ -221,8 +237,14 @@ export const generateDescriptionString = (
 
     let output = descriptionObject.username;
 
-    for (let activation of descriptionObject.categoryActivations) {
-        output += activation.activationAsText;
+    const activations = descriptionObject.categoryActivations;
+    let i = 0;
+    for (let activation of activations) {
+        output += activation.prefix + activation.mainActivationAsText + activation.suffix;
+        if (i < activations.length - 1) {
+            output += i === activations.length - 1 ? descriptionObject.lastConnector : descriptionObject.connector;
+        }
+        i++;
     }
 
     output += ".";
@@ -241,6 +263,8 @@ export function generateDescriptionObject(
 
     let output: CategoryValueDescription = {
         username: username,
+        connector: ", ",
+        lastConnector: " and ",
         categoryActivations: [],
     };
 
@@ -248,9 +272,13 @@ export function generateDescriptionObject(
     let firstValue = categoryValues[0];
 
     output.username += firstCategory.type === FeatureCategoryType.POSSESSIVE ? "'s " : " ";
+
+    let actCl = activationClause(firstCategory, firstValue, userGender);
     output.categoryActivations.push({
         categoryId: firstCategory.id,
-        activationAsText: categoryClause(firstCategory) + activationClause(firstCategory, firstValue, userGender),
+        prefix: "",
+        mainActivationAsText: categoryClause(firstCategory) + actCl.activationClausePrefix + actCl.activationClauseMain,
+        suffix: "",
     });
 
     for (let i = 1; i < categoryIds.length; i++) {
@@ -260,14 +288,14 @@ export function generateDescriptionObject(
         }
         let value = categoryValues[i];
 
-        let activationAsText = i < categoryIds.length - 1 ? ", " : " and ";
-        activationAsText += genderClause(category.type, userGender) + " ";
-        activationAsText += categoryClause(category);
-        activationAsText += activationClause(category, value, userGender);
+        let categoryCl = categoryClause(category);
+        let { activationClausePrefix, activationClauseMain } = activationClause(category, value, userGender);
 
         output.categoryActivations.push({
             categoryId: category.id,
-            activationAsText: activationAsText,
+            prefix: genderClause(category.type, userGender) + " " + (categoryCl === "" ? activationClausePrefix : ""),
+            mainActivationAsText: (categoryCl !== "" ? categoryCl + activationClausePrefix : "") + activationClauseMain,
+            suffix: "",
         });
     }
 

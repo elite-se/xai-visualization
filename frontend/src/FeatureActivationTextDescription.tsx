@@ -1,21 +1,36 @@
 import React from "react";
 import styled from "styled-components";
 import { generateDescriptionObject, Gender, CATEGORY_DEFINITIONS } from "./FeaturesToTextMapping";
-import { Popover, PopoverInteractionKind } from "@blueprintjs/core";
+import { Popover, PopoverInteractionKind, Colors } from "@blueprintjs/core";
 
-const Pre = styled.span`
+const MainActivation = styled.span`
     white-space: pre;
-    border-bottom: 1px solid green;
+    border-bottom: 2px solid ${Colors.BLUE5};
+
+    &:hover {
+        border-bottom: 3px solid ${Colors.BLUE4}88;
+        cursor: pointer;
+    }
 `;
 
 const Definition = styled.div`
-    padding: 8px 12px;
+    padding: 8px 12px 4px 12px;
     background: white;
-    max-width: 280px;
+    max-width: 320px;
 
-    h3 {
-        margin: 0;
+    h1,
+    h2 {
+        margin-top: 0;
+        margin-bottom: 0;
     }
+
+    p {
+        margin-top: 4px;
+    }
+`;
+
+const Emoji = styled.h1`
+    margin-right: 4px;
 `;
 
 function FeatureActivationTextDescription(props: {
@@ -32,26 +47,46 @@ function FeatureActivationTextDescription(props: {
     );
 
     let activationSpans = [];
-    for (let activation of categoryActivationsObject.categoryActivations) {
+    const activations = categoryActivationsObject.categoryActivations;
+    let i = 0;
+    for (let activation of activations) {
         let categoryDesc = CATEGORY_DEFINITIONS.filter((c) => c.id === activation.categoryId)[0];
 
         let contextDialogContent = (
             <Definition>
-                <h3>{activation.categoryId}</h3>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                    <Emoji>{categoryDesc.emoji}</Emoji> <h2>{categoryDesc.id}</h2>
+                </div>
                 <p>{categoryDesc.definition}</p>
             </Definition>
         );
 
         activationSpans.push(
-            <Popover key={activation.categoryId} interactionKind={PopoverInteractionKind.HOVER}>
-                <Pre className={"bp3-text-large"}>{activation.activationAsText}</Pre>
-                {contextDialogContent}
-            </Popover>
+            <span>
+                {activation.prefix}
+                <Popover
+                    key={activation.categoryId}
+                    interactionKind={PopoverInteractionKind.HOVER}
+                    hoverOpenDelay={50}
+                    hoverCloseDelay={50}
+                >
+                    <MainActivation>{activation.mainActivationAsText}</MainActivation>
+                    {contextDialogContent}
+                </Popover>
+                {activation.suffix}
+
+                {i === activations.length - 2
+                    ? categoryActivationsObject.lastConnector
+                    : i < activations.length - 2
+                    ? categoryActivationsObject.connector
+                    : ""}
+            </span>
         );
+        i++;
     }
 
     return (
-        <p>
+        <p style={{ fontSize: "1.1rem" }}>
             {categoryActivationsObject.username} {activationSpans}.
         </p>
     );
