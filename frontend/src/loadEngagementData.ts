@@ -62,7 +62,7 @@ const maxExplanationsValue = (data: DataPointType[]) => {
     return max;
 };
 
-const loadEngagementData = async (username: string, password: string, dataURL: string) => {
+const loadEngagementData = async (username: string, password: string, dataURL: string, smoothWithPredictions: boolean = false) => {
     try {
         const credentials = username + ":" + password;
         const response = await fetch(dataURL, {
@@ -70,33 +70,12 @@ const loadEngagementData = async (username: string, password: string, dataURL: s
         });
         const dataContainer: DataContainerType = await response.json();
         
-        let lastOutput = dataContainer.data[0].output.indexOf(Math.max(...dataContainer.data[0].output));
-        let currentWindowStart = 0;
-        let longWindowStart = 0;
-        let windowedData: DataPointType[] = [];
         const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate;
-        const minWindowSize = 5 * dataContainer.sampleRate;
-        for (var i = 1; i < dataContainer.data.length; i++) {
-            const prediction = dataContainer.data[i].output.indexOf(Math.max(...dataContainer.data[i].output));
-            if (lastOutput !== prediction) {
-                if (i - currentWindowStart >= minWindowSize) {
-                    if (longWindowStart < currentWindowStart) {
-                        windowedData = windowedData.concat(smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize));
-                        longWindowStart = i;
-                    }
-                    windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
-                }
-                lastOutput = prediction;
-                currentWindowStart = i;
-            }
+        if (smoothWithPredictions) {
+            dataContainer.data = smoothUsingPredictions(dataContainer, windowSize);
+        } else {
+            dataContainer.data = smoothData(dataContainer.data, windowSize);
         }
-        if (longWindowStart < currentWindowStart) {
-            windowedData = windowedData.concat(smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize));
-            longWindowStart = i;
-        }
-        windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
-
-        dataContainer.data = windowedData;
         
         dataContainer.maxExplanationValue = maxExplanationsValue(dataContainer.data);
         return dataContainer;
@@ -105,5 +84,29 @@ const loadEngagementData = async (username: string, password: string, dataURL: s
         return generateMockData() as DataContainerType;
     }
 };
+
+const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: number): DataPointType[] => {
+    let lastOutput = dataContainer.data[0].output.indexOf(Math.max(...dataContainer.data[0].output));
+    let currentWindowStart = 0;
+    let longWindowStart = 0;
+    let windowedData: DataPointType[] = [];
+    const minWindowSize = 5 * dataContainer.sampleRate;
+    for (var i = 1; i < dataContainer.data.length; i++) {
+        const prediction = dataContainer.data[i].output.indexOf(Math.max(...dataContainer.data[i].output));
+        if (lastOutput !== prediction) {
+            if (i - currentWindowStart >= minWindowSize || i + 1 == dataContainer.data.length) {
+                if (longWindowStart < currentWindowStart) {
+                    windowedData = windowedData.concat(smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize));
+                    longWindowStart = i;
+                }
+                windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
+            }
+            lastOutput = prediction;
+            currentWindowStart = i;
+        }
+    }
+    windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
+    return windowedData;
+}
 
 export default loadEngagementData;
