@@ -6,9 +6,9 @@ from tqdm import tqdm
 import multiprocessing
 
 
-def process_sample(explainer, predict_fn, sample):
+def process_sample(explainer, probability_model, sample):
     explanation = explainer.explain_instance(
-        sample, predict_fn, top_labels=4, num_features=18)
+        sample, probability_model.predict, top_labels=4, num_features=18)
 
     explanations = np.array([explanation.local_exp[i]
                              for i in map(int, explanation.local_exp.keys())])
@@ -22,7 +22,6 @@ def process_sample(explainer, predict_fn, sample):
         'explanations': per_class_explanations.tolist()
     }
 
-counter = 0
 
 def explain(model, samples):
     #samples = samples[:2000]
@@ -31,18 +30,10 @@ def explain(model, samples):
         background_dataset, feature_names=feature_names, discretize_continuous=False)
     probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
 
-    predictions = probability_model.predict(np.array(samples))
-
-
-    def predict(sample):
-        global counter
-        counter = counter + 1
-        return predictions[counter]
-
     data = []
 
     for sample in tqdm(samples):
-        data.append(process_sample(explainer, predict, sample))
+        data.append(process_sample(explainer, probability_model, sample))
 
     json = {
         'sampleRate': 25,
