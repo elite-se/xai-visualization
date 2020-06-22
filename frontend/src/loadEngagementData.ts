@@ -213,7 +213,7 @@ const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: nu
     for (var i = 1; i < dataContainer.data.length; i++) {
         const prediction = dataContainer.data[i].output.indexOf(Math.max(...dataContainer.data[i].output));
         if (lastOutput !== prediction) {
-            if (i - currentWindowStart >= minWindowSize || i + 1 == dataContainer.data.length) {
+            if (i - currentWindowStart >= minWindowSize || i + 1 === dataContainer.data.length) {
                 if (longWindowStart < currentWindowStart) {
                     windowedData = windowedData.concat(smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize));
                     longWindowStart = i;
