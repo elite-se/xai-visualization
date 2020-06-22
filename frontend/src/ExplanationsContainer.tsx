@@ -221,7 +221,8 @@ function ExplanationsContainer(props: {
                         }}
                         options={barChartOptions(props.maxExplanationValue)}
                     />
-                    : <WordCloud strongestFeatures={strongestOutputExplanations.topMostFeatures}
+                    : <WordCloud allLabels={props.labels}
+                                 strongestFeatures={strongestOutputExplanations.topMostFeatures}
                                  strongestLabels={strongestOutputExplanations.topMostLabels}/>
                 }
             </ChartContainer>
