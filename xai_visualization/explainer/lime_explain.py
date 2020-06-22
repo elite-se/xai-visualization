@@ -22,6 +22,7 @@ def process_sample(explainer, predict_fn, sample):
         'explanations': per_class_explanations.tolist()
     }
 
+counter = 0
 
 def explain(model, samples):
     #samples = samples[:2000]
@@ -31,12 +32,12 @@ def explain(model, samples):
     probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
 
     predictions = probability_model.predict(np.array(samples))
-    i = 0
+
 
     def predict(sample):
-        global i
-        i += 1
-        return predictions[i]
+        global counter
+        counter = counter + 1
+        return predictions[counter]
 
     data = []
 
