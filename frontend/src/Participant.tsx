@@ -25,7 +25,7 @@ const UserInfoContainer = styled.div`
 `;
 
 class Participant extends React.Component<
-    { videoURL: string; name: string; dataContainer: DataContainerType, mode: 'bar' | 'cloud' },
+    { videoURL: string; name: string; dataContainer: DataContainerType; mode: "bar" | "cloud" },
     { currentTime: number }
 > {
     state = { currentTime: 0 };
@@ -54,6 +54,7 @@ class Participant extends React.Component<
                             labels={dataContainer?.labels || []}
                             dataPoint={dataPoint}
                             mode={mode}
+                            username={name}
                             // @ts-ignore
                             maxExplanationValue={dataContainer.maxExplanationValue}
                         />

@@ -1,8 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import {HorizontalBar} from "react-chartjs-2";
-import {Colors} from "@blueprintjs/core";
+import { HorizontalBar } from "react-chartjs-2";
+import { Colors } from "@blueprintjs/core";
 import WordCloud from "./WordCloud";
+import FeatureActivationTextDescription from "./FeatureActivationTextDescription";
+import { Gender } from "./FeaturesToTextMapping";
 
 const Container = styled.div`
     position: relative;
@@ -48,8 +50,8 @@ const barChartOptions = (xAxesMax: number) => {
     return {
         layout: {
             padding: {
-                left: 220
-            }
+                left: 220,
+            },
         },
         legend: {
             display: false,
@@ -65,12 +67,12 @@ const barChartOptions = (xAxesMax: number) => {
                         max: xAxesMax,
                         callback: function (value: number, index: any, values: any) {
                             if (value === 0) {
-                                return 'Not important';
+                                return "Not important";
                             } else if (value === xAxesMax) {
-                                return 'Significantly important';
+                                return "Significantly important";
                             }
-                            return undefined
-                        }
+                            return undefined;
+                        },
                     },
                 },
             ],
@@ -78,10 +80,10 @@ const barChartOptions = (xAxesMax: number) => {
                 {
                     ticks: {
                         mirror: true,
-                        padding: 220
-                    }
-                }
-            ]
+                        padding: 220,
+                    },
+                },
+            ],
         },
     };
 };
@@ -151,27 +153,27 @@ const confidenceBlur = {
 };
 
 const ChartContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
-  width: 60%;
-  height: 100%;
-  transition: 0.2s filter linear, 0.2s -webkit-filter linear;
-  filter: blur(0px);
-`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 60%;
+    height: 100%;
+    transition: 0.2s filter linear, 0.2s -webkit-filter linear;
+    filter: blur(0px);
+`;
 
 const Unsure = styled.div`
-  position: absolute;
-  top: calc(50% - 25px);
-  margin: 0 auto;
-  transition: 0.5s opacity;
-  font-weight: bold;
-  font-size: 50px;
-  line-height: 50px;
-  text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
-  text-align: center;
-`
+    position: absolute;
+    top: calc(50% - 25px);
+    margin: 0 auto;
+    transition: 0.5s opacity;
+    font-weight: bold;
+    font-size: 50px;
+    line-height: 50px;
+    text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
+    text-align: center;
+`;
 
 const calculateBlur = (confidence: number) => {
     const entry = Object.entries(confidenceBlur).find(([percentage, blur]) => parseInt(percentage) >= confidence);
@@ -187,9 +189,10 @@ function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };
     labels: string[];
     maxExplanationValue: number;
-    mode: 'bar' | 'cloud'
+    mode: "bar" | "cloud";
+    username: string;
 }) {
-    const {output, explanations} = props.dataPoint;
+    const { output, explanations } = props.dataPoint;
     const strongestOutputIdx = output.indexOf(Math.max(...output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
 
@@ -201,14 +204,14 @@ function ExplanationsContainer(props: {
         true
     );
 
-    const blur = calculateBlur(confidence)
+    const blur = calculateBlur(confidence);
 
     return (
         <Container>
-            <Heading style={{filter: `blur(${blur}px)`}}>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
-            <ChartContainer style={{width: '90%', filter: `blur(${blur}px)`}}>
-                {props.mode === 'bar'
-                    ? <HorizontalBar
+            <Heading style={{ filter: `blur(${blur}px)` }}>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
+            <ChartContainer style={{ width: "90%", filter: `blur(${blur}px)` }}>
+                {props.mode === "bar" ? (
+                    <HorizontalBar
                         data={{
                             labels: strongestOutputExplanations.topMostLabels,
                             datasets: [
@@ -221,12 +224,22 @@ function ExplanationsContainer(props: {
                         }}
                         options={barChartOptions(props.maxExplanationValue)}
                     />
-                    : <WordCloud allLabels={props.labels} maxExplanationValue={props.maxExplanationValue}
-                                 strongestFeatures={strongestOutputExplanations.topMostFeatures}
-                                 strongestLabels={strongestOutputExplanations.topMostLabels}/>
-                }
+                ) : (
+                    <WordCloud
+                        allLabels={props.labels}
+                        maxExplanationValue={props.maxExplanationValue}
+                        strongestFeatures={strongestOutputExplanations.topMostFeatures}
+                        strongestLabels={strongestOutputExplanations.topMostLabels}
+                    />
+                )}
             </ChartContainer>
-            <Unsure style={{opacity: blur > 0 ? 1 : 0}}>UNSURE</Unsure>
+            <FeatureActivationTextDescription
+                categoryIds={strongestOutputExplanations.topMostLabels}
+                categoryValues={strongestOutputExplanations.topMostFeatures}
+                username={props.username}
+                userGender={Gender.MALE}
+            ></FeatureActivationTextDescription>
+            <Unsure style={{ opacity: blur > 0 ? 1 : 0 }}>UNSURE</Unsure>
         </Container>
     );
 }

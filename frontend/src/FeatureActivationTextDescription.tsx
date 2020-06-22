@@ -9,8 +9,9 @@ const Pre = styled.span`
 `;
 
 const Definition = styled.div`
-    padding: 12px;
+    padding: 8px 12px;
     background: white;
+    max-width: 280px;
 
     h3 {
         margin: 0;
