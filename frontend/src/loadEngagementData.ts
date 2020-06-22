@@ -62,10 +62,10 @@ const maxExplanationsValue = (data: DataPointType[]) => {
     return max;
 };
 
-const loadEngagementData = async (username: string, password: string) => {
+const loadEngagementData = async (username: string, password: string, dataURL: string) => {
     try {
         const credentials = username + ":" + password;
-        const response = await fetch("https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/lime-novice.video.mp4.json", {
+        const response = await fetch(dataURL, {
             headers: { Authorization: "Basic " + window.btoa(credentials || "") },
         });
         const dataContainer: DataContainerType = await response.json();

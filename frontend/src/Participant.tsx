@@ -33,7 +33,7 @@ class Participant extends React.Component<
     onTimeUpdate = (currentTime: number) => this.setState({ currentTime });
 
     render() {
-        const { videoURL, dataContainer } = this.props;
+        const { videoURL, name, dataContainer } = this.props;
         const { currentTime } = this.state;
         const dataPoint = dataContainer?.data[Math.floor(currentTime * dataContainer?.sampleRate)];
 
@@ -45,7 +45,7 @@ class Participant extends React.Component<
                     <VideoArea>
                         <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate} />
                         <UserInfoContainer>
-                            <UserInfo name={"John Doe"} engagementLevel={outputClass} />
+                            <UserInfo name={name} engagementLevel={outputClass} />
                         </UserInfoContainer>
                     </VideoArea>
                     {dataPoint && (
