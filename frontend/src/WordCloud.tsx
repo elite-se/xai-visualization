@@ -36,55 +36,23 @@ class WordCloud extends React.Component<{
                                          opacity: 0,
                                          transition: '0.5s'
                                      }}>{value}</text>
-                    } else if (sortedIndex === 0) {
-                        return <text key={value}
-                                     fill={CHART_COLOR_PALETTE[index]}
-                                     style={{
-                                         transform: 'translate(40px, 50px)',
-                                         fontSize: `${15 + 20 * scalar}px`,
-                                         fontWeight: 300 + 600 * scalar, transition: '0.5s'
-                                     }}
-                        >{value}</text>
-                    } else if (sortedIndex === 1) {
-                        return <text key={value}
-                                     fill={CHART_COLOR_PALETTE[index]}
-                                     style={{
-                                         transform: 'translate(80px, 20px)',
-                                         fontWeight: 300 + 600 * scalar,
-                                         fontSize: `${15 + 20 * scalar}px`,
-                                         transition: '0.5s'
-                                     }}
-                        >{value}</text>
-                    } else if (sortedIndex === 2) {
-                        return <text key={value}
-                                     fill={CHART_COLOR_PALETTE[index]}
-                                     style={{
-                                         transform: 'rotate(90deg) translate(20px, 20px)',
-                                         transformOrigin: '20px 20px',
-                                         fontSize: `${15 + 20 * scalar}px`,
-                                         fontWeight: 300 + 600 * scalar,
-                                         transition: '0.5s'
-                                     }}
-                        >{value}</text>
-                    } else if (sortedIndex === 3) {
-                        return <text key={value}
-                                     fill={CHART_COLOR_PALETTE[index]}
-                                     style={{
-                                         transform: 'translate(80px, 70px)',
-                                         fontSize: `${15 + 20 * scalar}px`,
-                                         fontWeight: 300 + 600 * scalar, transition: '0.5s'
-                                     }}
-                        >{value}</text>
-                    } else if (sortedIndex === 4) {
-                        return <text key={value}
-                                     fill={CHART_COLOR_PALETTE[index]}
-                                     style={{
-                                         transform: 'translate(50px, 85px)',
-                                         fontSize: `${15 + 20 * scalar}px`,
-                                         fontWeight: 300, transition: '0.5s'
-                                     }}
-                        >{value}</text>
-                    } else return null
+                    }
+                    const transform = [
+                        'translate(40px, 50px)',
+                        'translate(80px, 20px)',
+                        'rotate(90deg) translate(20px, 20px)',
+                        'translate(80px, 70px)',
+                        'translate(50px, 85px)'
+                    ][sortedIndex]
+                    const fontSize = `${15 + 20 * scalar}px`
+                    const fontWeight = 300 + 600 * scalar
+                    const transformOrigin = '20px 20px'
+
+                    return <text key={value}
+                                 fill={CHART_COLOR_PALETTE[index]}
+                                 style={{
+                                     transform, transformOrigin, fontSize, fontWeight, transition: '0.5s'
+                                 }}>{value}</text>
                 })
             }
         </ svg>
