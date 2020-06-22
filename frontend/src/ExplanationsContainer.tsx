@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import {HorizontalBar} from "react-chartjs-2";
 import {Colors} from "@blueprintjs/core";
+import WordCloud from "./WordCloud";
 
 const Container = styled.div`
     position: relative;
@@ -144,24 +145,30 @@ function sortAndSelectTopmostFeatures(
 
 const confidenceBlur = {
     "100": 0,
-    "50": 1,
-    "30": 2,
-    "10": 4,
+    "50": 2,
+    "30": 4,
+    "10": 8,
 };
 
 const ChartContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
   width: 60%;
+  height: 100%;
   transition: 0.2s filter linear, 0.2s -webkit-filter linear;
   filter: blur(0px);
 `
 
 const Unsure = styled.div`
   position: absolute;
-  top: 25%;
+  top: calc(50% - 25px);
   margin: 0 auto;
   transition: 0.5s opacity;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 50px;
+  line-height: 50px;
   text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
   text-align: center;
 `
@@ -214,7 +221,9 @@ function ExplanationsContainer(props: {
                         }}
                         options={barChartOptions(props.maxExplanationValue)}
                     />
-                    : <div/>
+                    : <WordCloud allLabels={props.labels}
+                                 strongestFeatures={strongestOutputExplanations.topMostFeatures}
+                                 strongestLabels={strongestOutputExplanations.topMostLabels}/>
                 }
             </ChartContainer>
             <Unsure style={{opacity: blur > 0 ? 1 : 0}}>UNSURE</Unsure>
