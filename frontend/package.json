@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && http-server build",
     "test": "react-scripts test --passWithNoTests",
     "eject": "react-scripts eject"
   },
@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.155",
-    "@types/styled-components": "^5.1.0"
+    "@types/styled-components": "^5.1.0",
+    "http-server": "^0.12.3"
   }
 }
