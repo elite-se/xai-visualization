@@ -1,9 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import { HorizontalBar } from "react-chartjs-2";
-import { Colors } from "@blueprintjs/core";
+import {HorizontalBar} from "react-chartjs-2";
+import {Colors} from "@blueprintjs/core";
 
 const Container = styled.div`
+    position: relative;
     flex-grow: 1;
 
     display: flex;
@@ -17,6 +18,7 @@ const Container = styled.div`
 const Heading = styled.h3`
     margin: 0 0 6px 0;
     text-transform: uppercase;
+    transition: 0.2s filter linear, 0.2s -webkit-filter linear;
 `;
 
 const CHART_COLOR_PALETTE = [
@@ -43,6 +45,11 @@ const CHART_COLOR_PALETTE = [
 const engagement_labels = ["very unattentive", "slightly unattentive", "slightly engaged", "very engaged"];
 const barChartOptions = (xAxesMax: number) => {
     return {
+        layout: {
+            padding: {
+                left: 220
+            }
+        },
         legend: {
             display: false,
         },
@@ -55,9 +62,25 @@ const barChartOptions = (xAxesMax: number) => {
                     ticks: {
                         min: 0,
                         max: xAxesMax,
+                        callback: function (value: number, index: any, values: any) {
+                            if (value === 0) {
+                                return 'Not important';
+                            } else if (value === xAxesMax) {
+                                return 'Significantly important';
+                            }
+                            return undefined
+                        }
                     },
                 },
             ],
+            yAxes: [
+                {
+                    ticks: {
+                        mirror: true,
+                        padding: 220
+                    }
+                }
+            ]
         },
     };
 };
@@ -121,10 +144,27 @@ function sortAndSelectTopmostFeatures(
 
 const confidenceBlur = {
     "100": 0,
-    "50": 0,
-    "30": 0,
-    "10": 0,
+    "50": 1,
+    "30": 2,
+    "10": 4,
 };
+
+const ChartContainer = styled.div`
+  width: 60%;
+  transition: 0.2s filter linear, 0.2s -webkit-filter linear;
+  filter: blur(0px);
+`
+
+const Unsure = styled.div`
+  position: absolute;
+  top: 25%;
+  margin: 0 auto;
+  transition: 0.5s opacity;
+  font-weight: bold;
+  font-size: 20px;
+  text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
+  text-align: center;
+`
 
 const calculateBlur = (confidence: number) => {
     const entry = Object.entries(confidenceBlur).find(([percentage, blur]) => parseInt(percentage) >= confidence);
@@ -140,8 +180,9 @@ function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };
     labels: string[];
     maxExplanationValue: number;
+    mode: 'bar' | 'cloud'
 }) {
-    const { output, explanations } = props.dataPoint;
+    const {output, explanations} = props.dataPoint;
     const strongestOutputIdx = output.indexOf(Math.max(...output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
 
@@ -153,24 +194,30 @@ function ExplanationsContainer(props: {
         true
     );
 
+    const blur = calculateBlur(confidence)
+
     return (
         <Container>
-            <Heading>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
-            <div style={{ width: "60%", filter: "blur(" + calculateBlur(confidence) + "px)" }}>
-                <HorizontalBar
-                    data={{
-                        labels: strongestOutputExplanations.topMostLabels,
-                        datasets: [
-                            {
-                                label: "Testing Explanations",
-                                backgroundColor: CHART_COLOR_PALETTE,
-                                data: strongestOutputExplanations.topMostFeatures,
-                            },
-                        ],
-                    }}
-                    options={barChartOptions(props.maxExplanationValue)}
-                />
-            </div>
+            <Heading style={{filter: `blur(${blur}px)`}}>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
+            <ChartContainer style={{width: '90%', filter: `blur(${blur}px)`}}>
+                {props.mode === 'bar'
+                    ? <HorizontalBar
+                        data={{
+                            labels: strongestOutputExplanations.topMostLabels,
+                            datasets: [
+                                {
+                                    label: "Testing Explanations",
+                                    backgroundColor: CHART_COLOR_PALETTE,
+                                    data: strongestOutputExplanations.topMostFeatures,
+                                },
+                            ],
+                        }}
+                        options={barChartOptions(props.maxExplanationValue)}
+                    />
+                    : <div/>
+                }
+            </ChartContainer>
+            <Unsure style={{opacity: blur > 0 ? 1 : 0}}>UNSURE</Unsure>
         </Container>
     );
 }

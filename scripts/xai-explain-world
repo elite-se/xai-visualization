@@ -15,7 +15,10 @@ def explain(args, session, samples, guy):
         json_data = lime_explain(model, samples[0])
     elif args.explainer == 'shap':
         json_data = shap_explain(model, samples[0])
-    dump_json(json_data, os.path.join(args.output, os.path.basename(os.path.normpath(session['path']) + "-" + guy + ".json")))
+    
+    output = os.path.basename(os.path.normpath(session['path']) + "-" + guy + ".json")
+    print("Writing to %s" % output)
+    dump_json(json_data, os.path.join(args.output, output))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("explain the decisions of the model")

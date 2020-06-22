@@ -68,7 +68,7 @@ const generateMockData = () => {
 
         data.push({ input, output: normalizedOutput, explanations });
     }
-    const maxExplanationValue = 1; //dummy max value since this is mock data anyway...
+    const maxExplanationValue = 1; // dummy max value since this is mock data anyway...
     return { sampleRate, labels, data, maxExplanationValue };
 };
 
