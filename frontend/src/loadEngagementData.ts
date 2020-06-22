@@ -6,7 +6,7 @@ export type DataContainerType = {
     sampleRate: number;
     labels: string[];
     data: DataPointType[];
-    maxExplanationValue: number;
+    maxExplanationValue?: number;
 };
 
 const AVG_WINDOW_SECONDS = 10; // Moving Average Window Size in seconds
@@ -24,7 +24,7 @@ const smoothData = (data: DataPointType[], windowSize: number): DataPointType[] 
             const smoothedInput = data[i].input.map((val, j) => (smoothedData[i - 1].input[j] * i + val) / (i + 1));
             const smoothedOutput = data[i].output.map((val, j) => (smoothedData[i - 1].output[j] * i + val) / (i + 1));
 
-            smoothedData[i] = { explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput };
+            smoothedData[i] = {explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput};
         } else {
             // Formula: smoothedData[i - 1] + (data[i] - data[i-windowSize]) / windowSize
             const smoothedExplanations = data[i].explanations.map((row, j) =>
@@ -41,7 +41,7 @@ const smoothData = (data: DataPointType[], windowSize: number): DataPointType[] 
                 (val, j) => smoothedData[i - 1].output[j] + (val - data[i - windowSize].output[j]) / windowSize
             );
 
-            smoothedData[i] = { explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput };
+            smoothedData[i] = {explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput};
         }
     }
     return smoothedData;
@@ -62,11 +62,88 @@ const maxExplanationsValue = (data: DataPointType[]) => {
     return max;
 };
 
+
+const categorize = (data: DataContainerType, mapping: FeatureCategoryTextMapping[]): DataContainerType => {
+    const newData: DataContainerType = {
+        sampleRate: data.sampleRate,
+        labels: data.labels.map((label: string) => {
+            const foundMapping = mapping.find(mapping => mapping.features.includes(label))
+            if (!foundMapping) {
+                throw Error("There is no category for feature " + label)
+            }
+            return foundMapping.id;
+        }),
+        data: []
+    }
+
+    newData.maxExplanationValue = maxExplanationsValue(newData.data)
+
+    return data
+}
+
+interface FeatureCategoryTextMapping {
+    id: string;
+    features: string[];
+    aggregateFunction: ((featureValues: number[]) => number)
+}
+
+
+const average = (featureValues: number[]) => {
+    return featureValues.reduce((acc, value) => acc + value, 0) / featureValues.length
+}
+
+const featuresToCategoryMapping: FeatureCategoryTextMapping[] = [
+    {
+        id: "Gaze",
+        features: ['1 face horizontal movement (emax)',
+            '2 face vertical movement (emax)'],
+        aggregateFunction: average
+    },
+    {
+        id: "Smile",
+        features: ['0 Valence from Face (emax)'],
+        aggregateFunction: average
+    },
+    {
+        id: "Voice",
+        features: ['15 voice activity'],
+        aggregateFunction: average
+    },
+    {
+        id: "Armscrossed",
+        features: ['3 armscrossed'],
+        aggregateFunction: average
+    },
+    {
+        id: "Headtouch",
+        features: ['4 headtouch'],
+        aggregateFunction: average
+    },
+    {
+        id: "BodyOpenness",
+        features: ['5 distance left hand left hip',
+            '6 distance right hand right hip',
+            '9 hand in front of left hip',
+            '10 hand in front of right hip'],
+        aggregateFunction: average
+    },
+    {
+        id: "Restlessness",
+        features: ['16 Skeleton overall activation'],
+        aggregateFunction: average,
+    },
+    {
+        id: "Gesticulation",
+        features: ['17 Skeleton energy global max'],
+        aggregateFunction: average
+    },
+]
+
 const loadEngagementData = async (username: string, password: string, dataURL: string) => {
     try {
         const credentials = username + ":" + password;
         const response = await fetch(dataURL, {
-            headers: { Authorization: "Basic " + window.btoa(credentials || "") },
+            headers: {Authorization: "Basic " + window.btoa(credentials || "")},
         });
         const dataContainer: DataContainerType = await response.json();
         const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate;
