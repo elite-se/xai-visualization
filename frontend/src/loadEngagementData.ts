@@ -80,15 +80,11 @@ const loadEngagementData = async (username: string, password: string, dataURL: s
             const prediction = dataContainer.data[i].output.indexOf(Math.max(...dataContainer.data[i].output));
             if (lastOutput !== prediction) {
                 if (i - currentWindowStart >= minWindowSize) {
-                    console.trace(`[${i}] writing out window from ${currentWindowStart} to ${i} because it's big enough`);
                     if (longWindowStart < currentWindowStart) {
                         windowedData = windowedData.concat(smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize));
-                        console.trace(`[${i}] but before that writing out ${longWindowStart} to ${currentWindowStart}`);
                         longWindowStart = i;
                     }
                     windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
-                } else {
-                    console.trace(`[${i}] skipping window from ${currentWindowStart} to ${i} because it's too small`);
                 }
                 lastOutput = prediction;
                 currentWindowStart = i;
