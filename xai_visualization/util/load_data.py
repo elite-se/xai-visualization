@@ -33,12 +33,35 @@ from tensorflow.keras.utils import to_categorical
 # 16 Skeleton overall activation
 # 17 Skeleton energy global max
 
+FEATURE_MASK = [
+    True,  # 0 Valence from Face (emax) (calculated on several AUs)
+    True,  # 1 face horizontal movement (emax)
+    True,  # 2 face vertical movement (emax)
+    True,  # 3 armscrossed
+    True,  # 4 headtouch
+    True,  # 5 distance left hand left hip
+    True,  # 6 distance right hand right hip
+    False,  # 7 left elbow y rotation
+    False,  # 8 right elbow y rotation
+    True,  # 9 hand in front of left hip
+    True,  # 10 hand in front of right hip
+    False,  # 11 left elbow x rotation
+    False,  # 12 right elbow x rotation
+    False,  # 13 standard deviation head x position
+    False,  # 14 standard deviation head x rotation
+    True,  # 15 voice activity
+    True,  # 16 Skeleton overall activation
+    True,  # 17 Skeleton energy global max
+]
+
+NUM_FEATURES = len(np.array(FEATURE_MASK)[FEATURE_MASK])
 
 def load_features(subdir, guy):
     path = os.path.join(subdir, guy + ".engagement_feature_set.stream~")
     features_file = open(path, "r")
     features = np.fromfile(features_file, dtype=np.float32)
-    return features.reshape((int(features.shape[0] / 18), 18))
+    features = features.reshape((int(features.shape[0] / 18), 18))
+    return features[:,FEATURE_MASK]
 
 
 def load_annotations(subdir, guy):
@@ -51,7 +74,6 @@ def load_annotations(subdir, guy):
     annotations = np.digitize(annotations, [0.25, 0.5, 0.75])
     annotations = to_categorical(annotations, num_classes=4, dtype='float32')
     return annotations
-
 
 def load_folder(path):
     sessions = []
@@ -76,7 +98,7 @@ def load_folder(path):
         print('Added session ' + subdir + '.')
     return sessions
 
-feature_names = [
+feature_names = np.array([
     '0 Valence from Face (emax)',
     '1 face horizontal movement (emax)',
     '2 face vertical movement (emax)',
@@ -95,4 +117,4 @@ feature_names = [
     '15 voice activity',
     '16 Skeleton overall activation',
     '17 Skeleton energy global max'
-]
+])[FEATURE_MASK]

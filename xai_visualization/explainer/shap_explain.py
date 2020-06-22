@@ -15,7 +15,7 @@ def explain(model, samples):
     data = []
 
     for sample in tqdm(samples):
-        # output format: [samples, classes, features(18)]
+        # output format: [samples, classes, features]
         per_class_explanations = np.squeeze(explainer.shap_values(np.array([sample])))
         data.append({
             'input': np.array(sample).tolist(),

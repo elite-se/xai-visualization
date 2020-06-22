@@ -1,14 +1,14 @@
 from lime.lime_tabular import LimeTabularExplainer
 import numpy as np
 import tensorflow as tf
-from xai_visualization.util.load_data import feature_names
+from xai_visualization.util.load_data import feature_names, NUM_FEATURES
 from tqdm import tqdm
 import multiprocessing
 
 
 def process_sample(explainer, probability_model, sample):
     explanation = explainer.explain_instance(
-        sample, probability_model.predict, top_labels=4, num_features=18)
+        sample, probability_model.predict, top_labels=4, num_features=NUM_FEATURES)
 
     explanations = np.array([explanation.local_exp[i]
                              for i in map(int, explanation.local_exp.keys())])
