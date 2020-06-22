@@ -117,4 +117,4 @@ feature_names = np.array([
     '15 voice activity',
     '16 Skeleton overall activation',
     '17 Skeleton energy global max'
-])[FEATURE_MASK]
+])[FEATURE_MASK].tolist()
