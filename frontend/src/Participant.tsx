@@ -25,7 +25,7 @@ const UserInfoContainer = styled.div`
 `;
 
 class Participant extends React.Component<
-    { videoURL: string; name: string; dataContainer: DataContainerType },
+    { videoURL: string; name: string; dataContainer: DataContainerType, mode: 'bar' | 'cloud' },
     { currentTime: number }
 > {
     state = { currentTime: 0 };
@@ -33,7 +33,7 @@ class Participant extends React.Component<
     onTimeUpdate = (currentTime: number) => this.setState({ currentTime });
 
     render() {
-        const { videoURL, name, dataContainer } = this.props;
+        const { videoURL, name, dataContainer, mode } = this.props;
         const { currentTime } = this.state;
         const dataPoint = dataContainer?.data[Math.floor(currentTime * dataContainer?.sampleRate)];
 
@@ -52,6 +52,7 @@ class Participant extends React.Component<
                         <ExplanationsContainer
                             labels={dataContainer?.labels || []}
                             dataPoint={dataPoint}
+                            mode={mode}
                             maxExplanationValue={dataContainer.maxExplanationValue}
                         />
                     )}

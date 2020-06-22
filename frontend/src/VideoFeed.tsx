@@ -30,7 +30,7 @@ function VideoFeed(props: { videoURL: string; onTimeUpdate: (t: number) => void 
 
     return (
         <VideoContainer>
-            <video muted autoPlay onTimeUpdate={onTimeUpdate}>
+            <video controls muted autoPlay onTimeUpdate={onTimeUpdate}>
                 <source src={props.videoURL} type="video/mp4" />
                 Your browser does not support HTML video.
             </video>

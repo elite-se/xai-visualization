@@ -35,7 +35,7 @@ const HorizontalSpacer = styled.div`
 
 type ParticipantData = { name: string; videoURL: string; dataURL: string; dataContainer: DataContainerType | null };
 
-type StateType = { username: string; password: string; participantsData: ParticipantData[] };
+type StateType = { username: string; password: string; participantsData: ParticipantData[], mode: 'bar' | 'cloud' };
 
 class App extends React.Component<{}, StateType> {
     state: StateType = {
@@ -55,6 +55,7 @@ class App extends React.Component<{}, StateType> {
                 dataContainer: null,
             },
         ],
+        mode: 'bar'
     };
 
     onUsernameChange = (event: SyntheticEvent<HTMLInputElement>) => {
@@ -83,6 +84,7 @@ class App extends React.Component<{}, StateType> {
                         dataContainer={pData.dataContainer}
                         name={pData.name}
                         videoURL={pData.videoURL}
+                        mode={this.state.mode}
                     />
                 );
                 if (i < participantsData.length - 1) {
@@ -95,6 +97,7 @@ class App extends React.Component<{}, StateType> {
     };
 
     render() {
+        const { mode } = this.state
         return (
             <Container>
                 <Navbar>
@@ -113,6 +116,11 @@ class App extends React.Component<{}, StateType> {
                         <InputGroup placeholder="Username" onChange={this.onUsernameChange} />
                         <InputGroup placeholder="Password" type="password" onChange={this.onPasswordChange} />
                         <Button onClick={this.loadData}>Load data!</Button>
+                        <NavbarDivider />
+                        <ButtonGroup>
+                            <Button active={mode === 'bar'} onClick={() => this.setState({ mode: 'bar' })}>Bar charts</Button>
+                            <Button active={mode === 'cloud'} onClick={() => this.setState({ mode: 'cloud' })}>Word cloud</Button>
+                        </ButtonGroup>
                     </NavbarGroup>
                 </Navbar>
 
