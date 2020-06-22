@@ -1,25 +1,6 @@
 import React from "react";
-import styled from "styled-components";
 import {Colors} from "@blueprintjs/core";
-import TagCloud from "react-tag-cloud";
 
-const Container = styled.div`
-    position: relative;
-    flex-grow: 1;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    box-sizing: border-box;
-    padding: 12px 8px;
-`;
-
-const Heading = styled.h3`
-    margin: 0 0 6px 0;
-    text-transform: uppercase;
-    transition: 0.2s filter linear, 0.2s -webkit-filter linear;
-`;
 
 const CHART_COLOR_PALETTE = [
     Colors.ROSE3,
@@ -64,10 +45,6 @@ const barChartOptions = (xAxesMax: number) => {
     };
 };
 
-const CustomTagCloud: any = styled(TagCloud)`
-  transition: 0.5s;
-`
-
 class WordCloud extends React.Component<{
     strongestLabels: string[],
     strongestFeatures: number[]
@@ -86,14 +63,16 @@ class WordCloud extends React.Component<{
             width: '100%'
         }
 
-        return <svg width='100%' height='100%'>
-            <text textAnchor='start' x={40} y={50} fontSize={30} style={{ fontWeight: 800 }} fill='dark-blue'>Gesticulation</text>
-            <text x={35} y={20} fontSize={20}
+        return <svg style={{ width:'40%', height:'40%' }} transform='scale(2)'>
+            <text x={20} y={20} fontSize={20}
                   style={{
                       transform: 'rotate(90deg)',
                       transformOrigin: '20px 20px'
-                  }}>Voice activity</text>
-            <text textAnchor='start' x={80} y={20} fontSize={20} style={{ fontWeight: 300 }}>Smiling</text>
+                  }} fill='black'>Voice activity</text>
+            <text textAnchor='start' x={40} y={50} fontSize={30} style={{ fontWeight: 800 }} fill='darkblue'>Gesticulation</text>
+            <text textAnchor='start' x={80} y={20} fontSize={20} style={{ fontWeight: 300 }} fill='darkred'>Smiling</text>
+            <text textAnchor='start' x={80} y={70} fontSize={15} style={{ fontWeight: 300 }} fill='darkgreen'>Arms Crossed</text>
+            <text textAnchor='start' x={50} y={85} fontSize={15} style={{ fontWeight: 300 }} fill='darkgray'>Head Rotation</text>
         </svg>
     }
 }
