@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import {HorizontalBar} from "react-chartjs-2";
 import {Colors} from "@blueprintjs/core";
+import WordCloud from "./WordCloud";
 
 const Container = styled.div`
     position: relative;
@@ -193,7 +194,8 @@ function ExplanationsContainer(props: {
                         }}
                         options={barChartOptions(props.maxExplanationValue)}
                     />
-                    : <div/>
+                    : <WordCloud strongestFeatures={strongestOutputExplanations.topMostFeatures}
+                                 strongestLabels={strongestOutputExplanations.topMostLabels}/>
                 }
             </ChartContainer>
             <Unsure style={{opacity: blur > 0 ? 1 : 0}}>UNSURE</Unsure>
