@@ -9,7 +9,7 @@ export type DataContainerType = {
     maxExplanationValue: number;
 };
 
-const AVG_WINDOW_SECONDS = 10; // Moving Average Window Size in seconds
+const AVG_WINDOW_SECONDS = 5; // Moving Average Window Size in seconds
 const smoothData = (data: DataPointType[], windowSize: number): DataPointType[] => {
     const smoothedData: DataPointType[] = Array(data.length);
     for (let i = 0; i < data.length; i++) {
@@ -71,17 +71,35 @@ const loadEngagementData = async (username: string, password: string, dataURL: s
         const dataContainer: DataContainerType = await response.json();
         
         let lastOutput = dataContainer.data[0].output.indexOf(Math.max(...dataContainer.data[0].output));
-        let windowStart = 0;
+        let currentWindowStart = 0;
+        let longWindowStart = 0;
         let windowedData: DataPointType[] = [];
         const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate;
+        const minWindowSize = 5 * dataContainer.sampleRate;
         for (var i = 1; i < dataContainer.data.length; i++) {
             const prediction = dataContainer.data[i].output.indexOf(Math.max(...dataContainer.data[i].output));
             if (lastOutput !== prediction) {
-                windowedData = windowedData.concat(smoothData(dataContainer.data.slice(windowStart, i), windowSize));
+                if (i - currentWindowStart >= minWindowSize) {
+                    console.trace(`[${i}] writing out window from ${currentWindowStart} to ${i} because it's big enough`);
+                    if (longWindowStart < currentWindowStart) {
+                        windowedData = windowedData.concat(smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize));
+                        console.trace(`[${i}] but before that writing out ${longWindowStart} to ${currentWindowStart}`);
+                        longWindowStart = i;
+                    }
+                    windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
+                } else {
+                    console.trace(`[${i}] skipping window from ${currentWindowStart} to ${i} because it's too small`);
+                }
                 lastOutput = prediction;
-                windowStart = i;
+                currentWindowStart = i;
             }
         }
+        if (longWindowStart < currentWindowStart) {
+            windowedData = windowedData.concat(smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize));
+            longWindowStart = i;
+        }
+        windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
+
         dataContainer.data = windowedData;
         
         dataContainer.maxExplanationValue = maxExplanationsValue(dataContainer.data);
