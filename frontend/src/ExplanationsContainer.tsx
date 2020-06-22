@@ -4,6 +4,7 @@ import { HorizontalBar } from "react-chartjs-2";
 import { Colors } from "@blueprintjs/core";
 
 const Container = styled.div`
+    position: relative;
     flex-grow: 1;
 
     display: flex;
@@ -17,6 +18,7 @@ const Container = styled.div`
 const Heading = styled.h3`
     margin: 0 0 6px 0;
     text-transform: uppercase;
+    transition: 0.2s filter linear, 0.2s -webkit-filter linear;
 `;
 
 const CHART_COLOR_PALETTE = [
@@ -121,10 +123,27 @@ function sortAndSelectTopmostFeatures(
 
 const confidenceBlur = {
     "100": 0,
-    "50": 0,
-    "30": 0,
-    "10": 0,
+    "50": 1,
+    "30": 2,
+    "10": 4,
 };
+
+const BarContainer = styled.div`
+  width: 60%;
+  transition: 0.2s filter linear, 0.2s -webkit-filter linear;
+  filter: blur(0px);
+`
+
+const Unsure = styled.div`
+  position: absolute;
+  top: 25%;
+  margin: 0 auto;
+  transition: 0.5s opacity;
+  font-weight: bold;
+  font-size: 20px;
+  text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
+  text-align: center;
+`
 
 const calculateBlur = (confidence: number) => {
     const entry = Object.entries(confidenceBlur).find(([percentage, blur]) => parseInt(percentage) >= confidence);
@@ -153,10 +172,12 @@ function ExplanationsContainer(props: {
         true
     );
 
+    const blur = calculateBlur(confidence)
+
     return (
         <Container>
-            <Heading>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
-            <div style={{ width: "60%", filter: "blur(" + calculateBlur(confidence) + "px)" }}>
+            <Heading style={{ filter: `blur(${blur}px)` }}>Why "{engagement_labels[strongestOutputIdx]}"?</Heading>
+            <BarContainer style={{ filter: `blur(${blur}px)` }}>
                 <HorizontalBar
                     data={{
                         labels: strongestOutputExplanations.topMostLabels,
@@ -170,7 +191,8 @@ function ExplanationsContainer(props: {
                     }}
                     options={barChartOptions(props.maxExplanationValue)}
                 />
-            </div>
+            </BarContainer>
+            <Unsure style={{ opacity: blur > 0 ? 1 : 0 }}>NOT CONFIDENT</Unsure>
         </Container>
     );
 }
