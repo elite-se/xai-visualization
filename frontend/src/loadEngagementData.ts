@@ -69,8 +69,20 @@ const loadEngagementData = async (username: string, password: string) => {
             headers: { Authorization: "Basic " + window.btoa(credentials || "") },
         });
         const dataContainer: DataContainerType = await response.json();
+        
+        let lastOutput = dataContainer.data[0].output.indexOf(Math.max(...dataContainer.data[0].output));
+        let windowStart = 0;
+        let windowedData: DataPointType[] = [];
         const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate;
-        dataContainer.data = smoothData(dataContainer.data, windowSize);
+        for (var i = 1; i < dataContainer.data.length; i++) {
+            const prediction = dataContainer.data[i].output.indexOf(Math.max(...dataContainer.data[i].output));
+            if (lastOutput !== prediction) {
+                windowedData = windowedData.concat(smoothData(dataContainer.data.slice(windowStart, i), windowSize));
+                lastOutput = prediction;
+            }
+        }
+        dataContainer.data = windowedData;
+        
         dataContainer.maxExplanationValue = maxExplanationsValue(dataContainer.data);
         return dataContainer;
     } catch (e) {
