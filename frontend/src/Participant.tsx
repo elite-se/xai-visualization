@@ -39,6 +39,7 @@ class Participant extends React.Component<
 
         const outputClass = dataPoint ? dataPoint.output.indexOf(Math.max(...dataPoint.output)) : 4;
 
+        // @ts-ignore
         return (
             <Card elevation={Elevation.TWO}>
                 <ParticipantLayout>
@@ -53,6 +54,7 @@ class Participant extends React.Component<
                             labels={dataContainer?.labels || []}
                             dataPoint={dataPoint}
                             mode={mode}
+                            // @ts-ignore
                             maxExplanationValue={dataContainer.maxExplanationValue}
                         />
                     )}

@@ -1,4 +1,5 @@
 import generateMockData from "./generateMockData";
+import {uniq} from 'lodash'
 
 export type DataPointType = { input: number[]; output: number[]; explanations: number[][] };
 
@@ -63,22 +64,54 @@ const maxExplanationsValue = (data: DataPointType[]) => {
 };
 
 
-const categorize = (data: DataContainerType, mapping: FeatureCategoryTextMapping[]): DataContainerType => {
+const categorize = (oldData: DataContainerType, mapping: FeatureCategoryTextMapping[]): DataContainerType => {
+    const labels = uniq(oldData.labels.map((label: string) => {
+        const foundMapping = mapping.find(mapping => mapping.features.includes(label))
+        if (!foundMapping) {
+            console.error("There is no category for feature " + label)
+            throw Error()
+        }
+        return foundMapping.id;
+    }))
     const newData: DataContainerType = {
-        sampleRate: data.sampleRate,
-        labels: data.labels.map((label: string) => {
-            const foundMapping = mapping.find(mapping => mapping.features.includes(label))
-            if (!foundMapping) {
-                throw Error("There is no category for feature " + label)
+        sampleRate: oldData.sampleRate,
+        labels: labels,
+        data: oldData.data.map(dataPoint => {
+            const newExplanations = []
+            for (const clazz of dataPoint.explanations) {
+                const newClazz = []
+                for (const info of mapping) {
+                    newClazz.push(
+                        info.aggregateFunction(
+                            clazz.filter((explanation, index) => info.features.includes(oldData.labels[index]))
+                        )
+                    );
+                }
+                newExplanations.push(newClazz)
             }
-            return foundMapping.id;
-        }),
-        data: []
+
+            const newInput = []
+            for (const info of mapping) {
+                newInput.push(
+                    info.aggregateFunction(
+                        dataPoint.input.filter((explanation, index) => info.features.includes(oldData.labels[index]))
+                    )
+                );
+            }
+
+
+            const newDataPoint: DataPointType = {
+                input: newInput,
+                output: dataPoint.output,
+                explanations: newExplanations
+            }
+            return newDataPoint;
+        })
     }
 
     newData.maxExplanationValue = maxExplanationsValue(newData.data)
 
-    return data
+    return newData
 }
 
 interface FeatureCategoryTextMapping {
@@ -137,6 +170,16 @@ const featuresToCategoryMapping: FeatureCategoryTextMapping[] = [
         features: ['17 Skeleton energy global max'],
         aggregateFunction: average
     },
+    {
+        id: "Undefined",
+        features: ['7 left elbow y rotation',
+            '8 right elbow y rotation',
+            '11 left elbow x rotation',
+            '12 right elbow x rotation',
+            '13 standard deviation head x position',
+            '14 standard deviation head x rotation',],
+        aggregateFunction: average
+    },
 ]
 
 const loadEngagementData = async (username: string, password: string, dataURL: string) => {
@@ -149,7 +192,7 @@ const loadEngagementData = async (username: string, password: string, dataURL: s
         const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate;
         dataContainer.data = smoothData(dataContainer.data, windowSize);
         dataContainer.maxExplanationValue = maxExplanationsValue(dataContainer.data);
-        return dataContainer;
+        return categorize(dataContainer, featuresToCategoryMapping);
     } catch (e) {
         console.error("Error loading or smoothing data. Using mocks");
         return generateMockData() as DataContainerType;
