@@ -79,6 +79,7 @@ const loadEngagementData = async (username: string, password: string, dataURL: s
             if (lastOutput !== prediction) {
                 windowedData = windowedData.concat(smoothData(dataContainer.data.slice(windowStart, i), windowSize));
                 lastOutput = prediction;
+                windowStart = i;
             }
         }
         dataContainer.data = windowedData;
