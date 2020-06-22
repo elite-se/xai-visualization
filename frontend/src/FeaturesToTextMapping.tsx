@@ -255,6 +255,9 @@ export function generateDescriptionObject(
 
     for (let i = 1; i < categoryIds.length; i++) {
         let category = featuresToTextMapping.filter((c) => c.id === categoryIds[i])[0];
+        if (!category) {
+            continue;
+        }
         let value = categoryValues[i];
 
         let activationAsText = i < categoryIds.length - 1 ? ", " : " and ";
