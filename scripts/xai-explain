@@ -3,11 +3,11 @@
 import argparse
 
 from xai_visualization.util.load_data import load_features
-import tensorflow as tf
+from xai_visualization.util.save_explain import dump_json
 from xai_visualization.explainer.shap_explain import explain as shap_explain
 from xai_visualization.explainer.lime_explain import explain as lime_explain
 import json
-from json import encoder
+import tensorflow as tf
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("explain the decisions of the model")
@@ -26,11 +26,4 @@ if __name__ == "__main__":
     elif args.explainer == 'shap':
         json_data = shap_explain(model, guy_features)
 
-    def round_floats(o):
-        if isinstance(o, float): return round(o, 4)
-        if isinstance(o, dict): return {k: round_floats(v) for k, v in o.items()}
-        if isinstance(o, (list, tuple)): return [round_floats(x) for x in o]
-        return o
-
-    with open(args.output, 'w') as f:
-        json.dump(round_floats(json_data), f, separators=(',', ':'))
+    dump_json(json_data, args.output)

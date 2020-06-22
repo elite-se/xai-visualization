@@ -1,0 +1,39 @@
+#!/bin/env python
+
+import argparse
+
+from xai_visualization.util.load_data import load_folder
+from xai_visualization.explainer.shap_explain import explain as shap_explain
+from xai_visualization.explainer.lime_explain import explain as lime_explain
+import json
+from xai_visualization.util.save_explain import dump_json
+import tensorflow as tf
+import os
+
+def explain(args, samples, guy):
+    if args.explainer == 'lime':
+        json_data = lime_explain(model, samples)
+    elif args.explainer == 'shap':
+        json_data = shap_explain(model, samples)
+    dump_json(json_data, os.path.join(args.output, os.path.basename(os.path.normpath(session['path']) + "-" + guy + ".json")))
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("explain the decisions of the model")
+    parser.add_argument("--model", type=str,
+                        help="the path to the model", required=True)
+    parser.add_argument("--dataset", type=str,
+                        help="the path to the dataset", required=True)
+    parser.add_argument("--explainer", type=str,
+                        choices=['lime', 'shap'], help="Which explainer to use", required=True)
+    parser.add_argument("--output", type=str,
+                        help="output path directory with jsons", required=True)
+    args = parser.parse_args()
+
+    sessions = load_folder(args.dataset)
+    model = tf.keras.models.load_model(args.model)
+
+    for session in sessions:
+        expert = session['expert']
+        novice = session['novice']
+        explain(args, expert, 'expert')
+        explain(args, novice, 'novice')

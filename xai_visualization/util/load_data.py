@@ -85,7 +85,7 @@ def load_folder(path):
             print('Folder ' + subdir + ' invalid. Skipping...')
             continue
 
-        session = {}
+        session = {'path': subdir}
         for guy in guys:
             features = load_features(subdir, guy)
             annotations = load_annotations(subdir, guy)
