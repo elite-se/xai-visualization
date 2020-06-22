@@ -67,7 +67,7 @@ class App extends React.Component<{}, StateType> {
     loadData = async () => {
         const { participantsData } = this.state;
         for (let pData of participantsData) {
-            pData.dataContainer = await loadEngagementData(this.state.username, this.state.password, pData.dataURL);
+            pData.dataContainer = await loadEngagementData(this.state.username, this.state.password, pData.dataURL, false);
         }
         this.setState({ participantsData });
     };
