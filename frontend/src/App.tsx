@@ -14,6 +14,7 @@ import {
 import {IconNames} from "@blueprintjs/icons";
 import styled from "styled-components";
 import loadEngagementData, {DataContainerType} from "./loadEngagementData";
+import getHashParams from "./getHashParams";
 
 const Container = styled.div`
     min-height: 100vh;
@@ -73,13 +74,7 @@ class App extends React.Component<{}, StateType> {
     componentDidMount() {
         if (window.location.hash) {
             try {
-                const hash = window.location.hash.substr(1);
-                const params = hash.split('&').reduce((acc: any, item) => {
-                    const parts = item.split('=');
-                    acc[parts[0]] = parts[1];
-                    return acc;
-                }, {});
-                const {username, password} = params
+                const {username, password} = getHashParams()
                 this.setState({username, password}, this.loadData)
             } catch {
                 console.error('Could not parse hash params.')
