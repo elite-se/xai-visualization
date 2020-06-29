@@ -32,6 +32,7 @@ type ParticipantData = { name: string; videoURL: string; dataURL: string; dataCo
 type StateType = {
     username: string;
     password: string;
+    sessionId: string;
     mode: 'bar' | 'cloud';
     participantsData: ParticipantData[],
     loading: boolean,
@@ -43,6 +44,7 @@ class App extends React.Component<{}, StateType> {
     state: StateType = {
         username: "",
         password: "",
+        sessionId: "008_2016-03-23_Paris",
         mode: 'bar',
         loading: false,
         participantsData: [],
@@ -51,18 +53,18 @@ class App extends React.Component<{}, StateType> {
     };
 
     getEmptyParticipantsData(): ParticipantData[] {
-        const {username, password} = this.state
+        const {username, password, sessionId} = this.state
         return [
             {
                 name: "Ian Jackson",
-                videoURL: `https://${username}:${password}@xn--ls8h.maxammann.org/001_2016-03-17_Paris/expert.video.mp4`,
-                dataURL: "https://xn--ls8h.maxammann.org/001_2016-03-17_Paris-expert.json",
+                videoURL: `https://${username}:${password}@xn--ls8h.maxammann.org/${sessionId}/expert.video.mp4`,
+                dataURL: `https://xn--ls8h.maxammann.org/${sessionId}-expert.json`,
                 dataContainer: null
             },
             {
                 name: "Allister McCrane",
-                videoURL: `https://${username}:${password}@xn--ls8h.maxammann.org/001_2016-03-17_Paris/novice.video.mp4`,
-                dataURL: "https://xn--ls8h.maxammann.org/001_2016-03-17_Paris-novice.json",
+                videoURL: `https://${username}:${password}@xn--ls8h.maxammann.org/${sessionId}/novice.video.mp4`,
+                dataURL: `https://xn--ls8h.maxammann.org/${sessionId}-novice.json`,
                 dataContainer: null
             }
         ]
