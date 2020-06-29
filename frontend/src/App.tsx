@@ -37,7 +37,8 @@ type StateType = {
     participantsData: ParticipantData[],
     loading: boolean,
     error: Error | null,
-    paused: boolean
+    paused: boolean,
+    showDevSettings: boolean
 };
 
 class App extends React.Component<{}, StateType> {
@@ -49,7 +50,8 @@ class App extends React.Component<{}, StateType> {
         loading: false,
         participantsData: [],
         error: null,
-        paused: false
+        paused: false,
+        showDevSettings: true
     };
 
     getEmptyParticipantsData(): ParticipantData[] {
@@ -74,7 +76,7 @@ class App extends React.Component<{}, StateType> {
         if (window.location.hash) {
             try {
                 const {username, password, sessionId} = getHashParams()
-                const newState: any = {username, password}
+                const newState: any = {username, password, showDevSettings: false}
                 if (sessionId) newState.sessionId = sessionId
                 this.setState(newState, this.loadData)
             } catch {
@@ -100,6 +102,12 @@ class App extends React.Component<{}, StateType> {
         }
     };
 
+    handleLoadDataButton = async () => {
+        const {username, password, sessionId} = this.state
+        window.location.hash = `#username=${username}&password=${password}&sessionId=${sessionId}`
+        await this.loadData()
+    }
+
     renderParticipants = () => {
         return this.state.participantsData
             .map((item, index) => item.dataContainer !== null
@@ -110,15 +118,15 @@ class App extends React.Component<{}, StateType> {
     };
 
     render() {
-        const {mode, username, password, loading, error, sessionId} = this.state
+        const {mode, username, password, loading, error, sessionId, showDevSettings} = this.state
         return <Container>
             <NavBar username={username} password={password} mode={mode} loading={loading} sessionId={sessionId}
                     setUsername={username => this.setState({username})}
                     setPassword={password => this.setState({password})}
                     setSessionId={sessionId => this.setState({sessionId})}
                     setMode={mode => this.setState({mode})}
-                    loadData={this.loadData}
-                    showDevSettings={!window.location.hash}
+                    loadData={this.handleLoadDataButton}
+                    showDevSettings={showDevSettings}
                     paused={this.state.paused}
                     onPause={() => this.setState(({paused}) => ({paused: !paused}))}/>
             <Main>{loading
