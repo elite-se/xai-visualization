@@ -1,5 +1,5 @@
 import React from "react";
-import {Card, Colors, Elevation} from "@blueprintjs/core";
+import {Card, Elevation} from "@blueprintjs/core";
 import VideoFeed from "./VideoFeed";
 import ExplanationsContainer from "./ExplanationsContainer";
 import styled from "styled-components";
@@ -28,11 +28,11 @@ const CustomCard = styled(Card)`
 `
 
 class Participant extends React.Component<{
-        videoURL: string; name: string;
-        dataContainer: DataContainerType;
-        mode: "bar" | "cloud";
-        paused: boolean
-    },
+    videoURL: string; name: string;
+    dataContainer: DataContainerType;
+    mode: "bar" | "cloud";
+    paused: boolean
+},
     { currentTime: number }> {
     state = {currentTime: 0};
 
@@ -50,22 +50,23 @@ class Participant extends React.Component<{
         return (
             <CustomCard elevation={Elevation.TWO}>
                 <VideoArea>
-                    <VideoFeed videoURL={videoURL} onSeeked={() => {}} onPause={() => {}} onPlay={() => {}} paused={this.props.paused} onTimeUpdate={this.onTimeUpdate}/>
+                    <VideoFeed videoURL={videoURL} onSeeked={() => {
+                    }} onPause={() => {
+                    }} onPlay={() => {
+                    }} paused={this.props.paused} onTimeUpdate={this.onTimeUpdate}/>
                     <UserInfoContainer>
                         <UserInfo name={name} engagementLevel={outputClass}/>
                     </UserInfoContainer>
                 </VideoArea>
-                {dataPoint && (
-                    <ExplanationsContainer
-                        labels={dataContainer?.labels || []}
-                        dataPoint={dataPoint}
-                        mode={mode}
-                        username={name}
-                        maxExplanationValue={dataContainer.maxExplanationValue}
-                        minInputValues={dataContainer.minInputs}
-                        maxInputValues={dataContainer.maxInputs}
-                    />
-                )}
+                <ExplanationsContainer
+                    labels={dataContainer?.labels || []}
+                    dataPoint={dataPoint}
+                    mode={mode}
+                    username={name}
+                    maxExplanationValue={dataContainer.maxExplanationValue}
+                    minInputValues={dataContainer.minInputs}
+                    maxInputValues={dataContainer.maxInputs}
+                />
             </CustomCard>
         );
     }

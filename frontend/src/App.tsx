@@ -81,14 +81,6 @@ class App extends React.Component<{}, StateType> {
         }
     }
 
-    onUsernameChange = (event: SyntheticEvent<HTMLInputElement>) => {
-        this.setState({username: event.currentTarget.value});
-    };
-
-    onPasswordChange = (event: SyntheticEvent<HTMLInputElement>) => {
-        this.setState({password: event.currentTarget.value});
-    };
-
     loadData = async () => {
         this.setState({loading: true})
         try {

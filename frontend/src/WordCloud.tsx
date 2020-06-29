@@ -1,18 +1,5 @@
 import React from "react";
 
-/*
-const CHART_COLOR_PALETTE = [
-    "darkblue",
-    "darkgreen",
-    "darkviolett",
-    "darkcyan",
-    "darkgoldenrod",
-    "darkgreen",
-    "darkred",
-    "darkslategray",
-];
-*/
-
 class WordCloud extends React.Component<{
     allLabels: string[];
     strongestLabels: string[];

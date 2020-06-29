@@ -69,7 +69,7 @@ const Unsure = styled.div`
 `;
 
 function ExplanationsContainer(props: {
-    dataPoint: { input: number[]; output: number[]; explanations: number[][] };
+    dataPoint: { input: number[]; output: number[]; explanations: number[][] } | null;
     labels: string[];
     maxExplanationValue: number;
     minInputValues: number[];
@@ -78,6 +78,7 @@ function ExplanationsContainer(props: {
     username: string;
 }) {
     const {maxInputValues, minInputValues, maxExplanationValue, dataPoint, username, labels, mode} = props
+    if (!dataPoint) return <Container/>
     const {input, output, explanations} = dataPoint;
     const strongestOutputIdx = output.indexOf(Math.max(...output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
