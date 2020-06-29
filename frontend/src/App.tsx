@@ -1,4 +1,4 @@
-import React, {SyntheticEvent} from "react";
+import React from "react";
 import Participant from "./Participant";
 import styled from "styled-components";
 import loadEngagementData, {DataContainerType} from "./loadEngagementData";
@@ -37,7 +37,9 @@ type StateType = {
     participantsData: ParticipantData[],
     loading: boolean,
     error: Error | null,
-    paused: boolean
+    paused: boolean,
+    showDevSettings: boolean,
+    volume: number
 };
 
 class App extends React.Component<{}, StateType> {
@@ -49,7 +51,9 @@ class App extends React.Component<{}, StateType> {
         loading: false,
         participantsData: [],
         error: null,
-        paused: false
+        paused: false,
+        showDevSettings: true,
+        volume: 1
     };
 
     getEmptyParticipantsData(): ParticipantData[] {
@@ -73,8 +77,10 @@ class App extends React.Component<{}, StateType> {
     componentDidMount() {
         if (window.location.hash) {
             try {
-                const {username, password} = getHashParams()
-                this.setState({username, password}, this.loadData)
+                const {username, password, sessionId} = getHashParams()
+                const newState: any = {username, password, showDevSettings: false}
+                if (sessionId) newState.sessionId = sessionId
+                this.setState(newState, this.loadData)
             } catch {
                 console.error('Could not parse hash params.')
             }
@@ -86,7 +92,9 @@ class App extends React.Component<{}, StateType> {
         try {
             const participantsData = this.getEmptyParticipantsData()
             for (let pData of participantsData) {
-                pData.dataContainer = await loadEngagementData(this.state.username, this.state.password, pData.dataURL, false);
+                pData.dataContainer = await loadEngagementData(
+                    this.state.username, this.state.password, pData.dataURL, false
+                );
             }
             this.setState({participantsData});
         } catch (error) {
@@ -96,28 +104,38 @@ class App extends React.Component<{}, StateType> {
         }
     };
 
+    handleLoadDataButton = async () => {
+        const {username, password, sessionId} = this.state
+        window.location.hash = `#username=${username}&password=${password}&sessionId=${sessionId}`
+        await this.loadData()
+    }
+
     renderParticipants = () => {
         return this.state.participantsData
             .map((item, index) => item.dataContainer !== null
                 ? <Participant key={"p" + index} dataContainer={item.dataContainer} name={item.name}
+                               volume={this.state.volume}
                                videoURL={item.videoURL} mode={this.state.mode} paused={this.state.paused}/>
                 : null)
             .filter(item => !!item)
     };
 
     render() {
-        const {mode, username, password, loading, error} = this.state
+        const {mode, username, password, loading, error, sessionId, showDevSettings, volume, paused} = this.state
         return <Container>
-            <NavBar username={username} password={password} mode={mode} loading={loading}
+            <NavBar username={username} password={password} mode={mode} loading={loading} sessionId={sessionId}
                     setUsername={username => this.setState({username})}
                     setPassword={password => this.setState({password})}
+                    setSessionId={sessionId => this.setState({sessionId})}
                     setMode={mode => this.setState({mode})}
-                    loadData={this.loadData}
-                    showDevSettings={!window.location.hash}
-                    paused={this.state.paused}
-                    onPause={() => {this.setState(({paused}) => ({paused: !paused}))}}/>
+                    loadData={this.handleLoadDataButton}
+                    showDevSettings={showDevSettings}
+                    paused={paused}
+                    volume={volume}
+                    setVolume={(volume: number) => this.setState({volume})}
+                    onPause={() => this.setState(({paused}) => ({paused: !paused}))}/>
             <Main>{loading
-                ? <Spinner />
+                ? <Spinner/>
                 : error ? <Card>Some error occurred: ${error.message}</Card> : this.renderParticipants()}</Main>
         </Container>
     }
