@@ -24,7 +24,7 @@ const Definition = styled.div`
         margin-bottom: 0;
     }
 
-    p {
+    > span {
         margin-top: 4px;
     }
 `;
@@ -89,9 +89,9 @@ function FeatureActivationTextDescription(props: {
     }
 
     return (
-        <p style={{ fontSize: "1.1rem", margin: 0 }}>
+        <span style={{ fontSize: "1.1rem", margin: 0 }}>
             {categoryActivationsObject.username} {activationSpans}.
-        </p>
+        </span>
     );
 }
 

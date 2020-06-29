@@ -1,176 +1,44 @@
 import React from "react";
 import styled from "styled-components";
-import { HorizontalBar } from "react-chartjs-2";
-import { Colors } from "@blueprintjs/core";
 import WordCloud from "./WordCloud";
 import FeatureActivationTextDescription from "./FeatureActivationTextDescription";
-import { Gender } from "./FeaturesToTextMapping";
-import {
-    ENGAGEMENT_LABELS,
-    ENGAGEMENT_COLORS,
-    ENGAGEMENT_POSITIVE_COLOR_PALETTE,
-    ENGAGEMENT_NEGATIVE_COLOR_PALETTE,
-} from "./EngagementDefinitions";
+import {Gender} from "./FeaturesToTextMapping";
+import {ENGAGEMENT_NEGATIVE_COLOR_PALETTE, ENGAGEMENT_POSITIVE_COLOR_PALETTE,} from "./EngagementDefinitions";
+import sortAndSelectTopmostFeatures from "./sortAndSelectTopmostFeatures";
+import calculateBlur from "./calculateBlur";
+import ExplanationsHeading from "./ExplanationsHeading";
+import BarChart from "./BarChart";
+import normalizeInput from "./normalizeInput";
 
 const Container = styled.div`
     position: relative;
-    flex-grow: 1;
-
-    display: flex;
+    flex: 55;
+    height: 100%;
+    
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-
-    box-sizing: border-box;
-    padding: 12px 16px;
 `;
 
-const Heading = styled.div`
+const Explanations = styled.div`
     display: flex;
     align-items: center;
-    padding: 4px 6px;
-    border: 2px solid ${Colors.LIGHT_GRAY2}55;
-    margin: 0 0 6px 0;
-    transition: 0.2s filter linear, 0.2s -webkit-filter linear;
-
-    p {
-        margin: 0;
-    }
-
-    .classification {
-        text-transform: uppercase;
-        margin: 0;
-        margin-left: 4px;
-    }
-`;
+    box-sizing: border-box;
+    flex-direction: column;
+    padding: 12px;
+    height: 100%;
+    overflow: hidden;
+`
 
 const BasedOn = styled.div`
-    align-self: start;
-    display: flex;
     align-items: center;
     margin: 8px 0;
     transition: 0.2s filter linear, 0.2s -webkit-filter linear;
 
-    h4 {
-        margin: 0;
-        margin-right: 6px;
+    > span {
+        margin: 0 3px 0 0;
     }
 `;
-
-const barChartOptions = (xAxesMax: number) => {
-    return {
-        layout: {
-            padding: {
-                left: 220,
-            },
-        },
-        legend: {
-            display: false,
-        },
-        tooltips: {
-            enabled: false,
-        },
-        scales: {
-            xAxes: [
-                {
-                    position: "top",
-                    ticks: {
-                        min: 0,
-                        max: xAxesMax,
-                        callback: function (value: number, index: any, values: any) {
-                            if (value === 0) {
-                                return "Not important";
-                            } else if (value === xAxesMax) {
-                                return "Significantly important";
-                            }
-                            return undefined;
-                        },
-                        fontSize: 16,
-                    },
-                },
-            ],
-            yAxes: [
-                {
-                    ticks: {
-                        mirror: true,
-                        padding: 220,
-                        fontSize: 16,
-                        fontStyle: "bold",
-                    },
-                },
-            ],
-        },
-    };
-};
-
-/**
- * Sorts the passed in explanations (either ascending or descending) and
- * returns all values and their labels that are (in value, regardless of sign) greater than the threshold.
- * It returns at least minNrOfFeatures values, in case that too little values are greater than the threshold.
- * @param labels
- * @param inputs_in
- * @param explanations_in
- * @param minNrOfFeatures
- * @param threshold
- * @param sortDescending
- */
-function sortAndSelectTopmostFeatures(
-    labels: string[],
-    inputs_in: number[],
-    explanations_in: number[],
-    minNrOfFeatures: number,
-    threshold: number,
-    sortDescending: boolean
-): { topMostLabels: string[]; topMostExplanations: number[]; topMostInputs: number[] } {
-    if (explanations_in.length !== labels.length) throw new Error();
-
-    let explanations = explanations_in.slice(0);
-    let inputs = inputs_in.slice(0);
-    let labelOrder = Array.from(Array(explanations.length).keys()).sort((a, b) => explanations[a] - explanations[b]);
-    explanations.sort((a, b) => a - b);
-
-    if (sortDescending) {
-        labelOrder.reverse();
-        explanations.reverse();
-    }
-
-    //Does this "normalisation" make sense?
-    //It would keep our displayed values between 0..1 but also distort between frames:
-    //if on one frame we have a lot of big values and on another no big values at all,
-    //the relations between the values might look the same for those frames, even though the networks "activation" was not the same at all
-
-    //const sumExplanation = explanations.reduce((a, b) => Math.abs(a) + Math.abs(b), 0);
-    //explanations = explanations.map((x) => x / sumExplanation); //normalize
-
-    let ctr = minNrOfFeatures;
-    let findMoreFeatures = true;
-    while (findMoreFeatures) {
-        if (Math.abs(explanations[ctr]) >= threshold) {
-            ctr++;
-        } else {
-            findMoreFeatures = false;
-        }
-    }
-
-    let topMostLables = [];
-    let topMostInputs = [];
-    for (let i = 0; i < ctr; i++) {
-        topMostLables.push(labels[labelOrder[i]]);
-        topMostInputs.push(inputs[labelOrder[i]]);
-    }
-
-    return {
-        topMostLabels: topMostLables,
-        topMostExplanations: explanations.slice(0, ctr),
-        topMostInputs: topMostInputs,
-    };
-}
-
-const confidenceBlur = {
-    "100": 0,
-    "50": 2,
-    "30": 4,
-    "10": 8,
-};
 
 const ChartContainer = styled.div`
     display: flex;
@@ -178,50 +46,26 @@ const ChartContainer = styled.div`
     align-items: center;
     justify-content: space-evenly;
     width: 60%;
-    height: 100%;
+    flex-grow: 1;
     transition: 0.2s filter linear, 0.2s -webkit-filter linear;
     filter: blur(0px);
 `;
 
 const Unsure = styled.div`
     position: absolute;
-    top: calc(50% - 25px);
-    margin: 0 auto;
+    display: flex;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     transition: 0.5s opacity;
+    pointer-events: none;
     font-weight: bold;
     font-size: 50px;
-    line-height: 50px;
     text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
-    text-align: center;
+    justify-content: center;
+    align-items: center;
 `;
-
-const calculateBlur = (confidence: number) => {
-    const entry = Object.entries(confidenceBlur).find(([percentage, blur]) => parseInt(percentage) >= confidence);
-
-    if (!entry) {
-        return 0;
-    }
-
-    return entry[1];
-};
-
-const normalize = (inArr: number[], mins: number[], maxs: number[]) => {
-    if (!(inArr.length === mins.length && inArr.length === maxs.length)) return inArr; //can't normalize with not equal length arrays
-    let retArr = Array(inArr.length);
-    for (let i = 0; i < inArr.length; i++) {
-        retArr[i] = (inArr[i] - mins[i]) / (maxs[i] - mins[i]);
-        if (retArr[i] < 0 || retArr[i] > 1)
-            console.log(
-                "Something went wrong during normalisation @index: " +
-                    i +
-                    ", value: " +
-                    inArr[i] +
-                    ", normalized: " +
-                    retArr[i]
-            );
-    }
-    return retArr;
-};
 
 function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };
@@ -232,15 +76,16 @@ function ExplanationsContainer(props: {
     mode: "bar" | "cloud";
     username: string;
 }) {
-    const { input, output, explanations } = props.dataPoint;
+    const {maxInputValues, minInputValues, maxExplanationValue, dataPoint, username, labels, mode} = props
+    const {input, output, explanations} = dataPoint;
     const strongestOutputIdx = output.indexOf(Math.max(...output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
 
-    let input_normalized = normalize(input, props.minInputValues, props.maxInputValues);
+    const inputNormalized = normalizeInput(input, minInputValues, maxInputValues);
 
     const strongestOutputExplanations = sortAndSelectTopmostFeatures(
-        props.labels,
-        input_normalized,
+        labels,
+        inputNormalized,
         explanations[strongestOutputIdx],
         3,
         0.2,
@@ -252,46 +97,32 @@ function ExplanationsContainer(props: {
 
     return (
         <Container>
-            <Heading style={{ filter: `blur(${blur}px)`, borderColor: ENGAGEMENT_COLORS[strongestOutputIdx] }}>
-                <p>The AI detects: </p>
-                <h3 className="classification">{ENGAGEMENT_LABELS[strongestOutputIdx]}</h3>
-            </Heading>
-            <BasedOn style={{ filter: `blur(${blur}px)` }}>
-                <h4>Based on: </h4>
-                <FeatureActivationTextDescription
-                    categoryIds={strongestOutputExplanations.topMostLabels}
-                    categoryValues={strongestOutputExplanations.topMostInputs}
-                    username={props.username}
-                    userGender={Gender.MALE}
-                    popOverDisabled={blur > 0}
-                ></FeatureActivationTextDescription>
-            </BasedOn>
-            <ChartContainer style={{ width: "90%", filter: `blur(${blur}px)` }}>
-                {props.mode === "bar" ? (
-                    <HorizontalBar
-                        data={{
-                            labels: strongestOutputExplanations.topMostLabels,
-                            datasets: [
-                                {
-                                    label: "Testing Explanations",
-                                    backgroundColor: colorPalette,
-                                    data: strongestOutputExplanations.topMostExplanations,
-                                },
-                            ],
-                        }}
-                        options={barChartOptions(props.maxExplanationValue)}
+            <Explanations style={{filter: `blur(${blur}px)`}}>
+                <ExplanationsHeading strongestOutputIdx={strongestOutputIdx}/>
+                <BasedOn>
+                    <span>Based on: </span>
+                    <FeatureActivationTextDescription
+                        categoryIds={strongestOutputExplanations.topMostLabels}
+                        categoryValues={strongestOutputExplanations.topMostInputs}
+                        username={username}
+                        userGender={Gender.MALE}
+                        popOverDisabled={blur > 0}
                     />
-                ) : (
-                    <WordCloud
-                        allLabels={props.labels}
-                        maxExplanationValue={props.maxExplanationValue}
-                        strongestFeatures={strongestOutputExplanations.topMostExplanations}
-                        strongestLabels={strongestOutputExplanations.topMostLabels}
-                        colorPalette={colorPalette}
-                    />
-                )}
-            </ChartContainer>
-            <Unsure style={{ opacity: blur > 0 ? 1 : 0 }}>UNSURE</Unsure>
+                </BasedOn>
+                <ChartContainer style={{width: "90%"}}>
+                    {mode === "bar"
+                        ? <BarChart strongestOutputIdx={strongestOutputIdx}
+                                    strongestOutputExplanations={strongestOutputExplanations}
+                                    maxExplanationValue={maxExplanationValue}/>
+                        : <WordCloud
+                            allLabels={labels}
+                            maxExplanationValue={maxExplanationValue}
+                            strongestFeatures={strongestOutputExplanations.topMostExplanations}
+                            strongestLabels={strongestOutputExplanations.topMostLabels}
+                            colorPalette={colorPalette}/>}
+                </ChartContainer>
+            </Explanations>
+            <Unsure style={{opacity: blur > 0 ? 1 : 0}}>UNSURE</Unsure>
         </Container>
     );
 }

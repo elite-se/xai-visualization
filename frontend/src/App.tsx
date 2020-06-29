@@ -23,6 +23,8 @@ const Main = styled.main`
     box-sizing: border-box;
     justify-content: center;
     padding: 0 40px;
+    background-color: #eee;
+    overflow: hidden;
 `;
 
 type ParticipantData = { name: string; videoURL: string; dataURL: string; dataContainer: DataContainerType | null };
