@@ -1,5 +1,6 @@
 import React from "react";
 
+/*
 const CHART_COLOR_PALETTE = [
     "darkblue",
     "darkgreen",
@@ -10,6 +11,7 @@ const CHART_COLOR_PALETTE = [
     "darkred",
     "darkslategray",
 ];
+*/
 
 class WordCloud extends React.Component<{
     allLabels: string[];
