@@ -207,6 +207,14 @@ const loadEngagementData = async (
     discretizeValues = false,
     discretizeOutputOnly = false
 ) => {
+
+    await fetch("https://xai.elite-se.xyz/dologin.html", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: "httpd_username=gruppe1&httpd_password=Rion5iquit%21Ndo"
+    })
     const credentials = username + ":" + password;
     const response = await fetch(dataURL, {
         headers: { Authorization: "Basic " + window.btoa(credentials || "") },

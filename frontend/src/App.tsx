@@ -70,15 +70,15 @@ class App extends React.Component<{}, StateType> {
             {
                 name: genders[sessionId].expert.name,
                 gender: genders[sessionId].expert.gender,
-                videoURL: `https://${username}:${password}@xn--ls8h.maxammann.org/${sessionId}/expert.video.mp4`,
-                dataURL: `https://xn--ls8h.maxammann.org/${sessionId}-expert.json`,
+                videoURL: `https://${username}:${password}@xai.elite-se.xyz/noxi-dataset/${sessionId}/expert.video.mp4`,
+                dataURL: `https://xai.elite-se.xyz/noxi-dataset/${sessionId}-expert.json`,
                 dataContainer: null,
             },
             {
                 name: genders[sessionId].novice.name,
                 gender: genders[sessionId].novice.gender,
-                videoURL: `https://${username}:${password}@xn--ls8h.maxammann.org/${sessionId}/novice.video.mp4`,
-                dataURL: `https://xn--ls8h.maxammann.org/${sessionId}-novice.json`,
+                videoURL: `https://${username}:${password}@xai.elite-se.xyz/noxi-dataset/${sessionId}/novice.video.mp4`,
+                dataURL: `https://xai.elite-se.xyz/noxi-dataset/${sessionId}-novice.json`,
                 dataContainer: null,
             },
         ];
