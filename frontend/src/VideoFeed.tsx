@@ -16,6 +16,7 @@ type PropsType = {
 
 class VideoFeed extends React.Component<PropsType> {
     videoRef: React.RefObject<HTMLVideoElement>
+    allowUpdate = true
 
     constructor(props: PropsType) {
         super(props);
@@ -35,8 +36,14 @@ class VideoFeed extends React.Component<PropsType> {
         }
     }
 
-    onTimeUpdate = (event: SyntheticEvent<HTMLVideoElement>) =>
-        this.props.onTimeUpdate(event.currentTarget.currentTime);
+    onTimeUpdate = (event: SyntheticEvent<HTMLVideoElement>) => {
+        if (this.allowUpdate) {
+            this.allowUpdate = false
+            const currentTime = event.currentTarget.currentTime
+            window.requestAnimationFrame(() => this.props.onTimeUpdate(currentTime))
+            setTimeout(() => { this.allowUpdate = true }, 250)
+        }
+    }
 
     onSeeked = (event: SyntheticEvent<HTMLVideoElement>) =>
         this.props.onSeeked(event.currentTarget.currentTime);
