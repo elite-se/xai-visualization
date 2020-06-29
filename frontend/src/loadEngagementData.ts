@@ -1,5 +1,4 @@
-import generateMockData from "./generateMockData";
-import { uniq } from "lodash";
+import {uniq} from "lodash";
 
 export type DataPointType = { input: number[]; output: number[]; explanations: number[][] };
 
@@ -86,9 +85,9 @@ const maxExplanationsAndMinMaxInputValue = (data: DataPointType[]) => {
     };
 };
 
-const categorize = (oldData: DataContainerType, mapping: FeatureCategoryTextMapping[]): DataContainerType => {
+const categorize = (oldDataContainer: DataContainerType, mapping: FeatureCategoryTextMapping[]): DataContainerType => {
     const labels = uniq(
-        oldData.labels.map((label: string) => {
+        oldDataContainer.labels.map((label: string) => {
             const foundMapping = mapping.find((mapping) => mapping.features.includes(label));
             if (!foundMapping) {
                 console.error("There is no category for feature " + label);
@@ -98,50 +97,48 @@ const categorize = (oldData: DataContainerType, mapping: FeatureCategoryTextMapp
         })
     );
 
-    const newData: DataContainerType = {
-        sampleRate: oldData.sampleRate,
-        labels: labels,
-        data: oldData.data.map((dataPoint) => {
-            const newExplanations = [];
-            for (const clazz of dataPoint.explanations) {
-                const newClazz = [];
-                for (const info of mapping) {
-                    newClazz.push(
-                        info.aggregateFunction(
-                            clazz.filter((explanation, index) => info.features.includes(oldData.labels[index]))
-                        )
-                    );
-                }
-                newExplanations.push(newClazz);
-            }
 
-            const newInput = [];
+    let newData = oldDataContainer.data.map((dataPoint) => {
+        const newExplanations = [];
+        for (const clazz of dataPoint.explanations) {
+            const newClazz = [];
             for (const info of mapping) {
-                newInput.push(
+                newClazz.push(
                     info.aggregateFunction(
-                        dataPoint.input.filter((explanation, index) => info.features.includes(oldData.labels[index]))
+                        clazz.filter((explanation, index) => info.features.includes(oldDataContainer.labels[index]))
                     )
                 );
             }
+            newExplanations.push(newClazz);
+        }
 
-            const newDataPoint: DataPointType = {
-                input: newInput,
-                output: dataPoint.output,
-                explanations: newExplanations,
-            };
-            return newDataPoint;
-        }),
-        maxExplanationValue: 0,
-        maxInputs: [],
-        minInputs: [],
+        const newInput = [];
+        for (const info of mapping) {
+            newInput.push(
+                info.aggregateFunction(
+                    dataPoint.input.filter((explanation, index) => info.features.includes(oldDataContainer.labels[index]))
+                )
+            );
+        }
+
+        const newDataPoint: DataPointType = {
+            input: newInput,
+            output: dataPoint.output,
+            explanations: newExplanations,
+        };
+        return newDataPoint;
+    });
+
+    const maxValues = maxExplanationsAndMinMaxInputValue(newData);
+
+    return {
+        sampleRate: oldDataContainer.sampleRate,
+        labels: labels,
+        data: newData,
+        maxExplanationValue: maxValues.maxExplanation,
+        maxInputs: maxValues.maxInputValues,
+        minInputs: maxValues.minInputValues,
     };
-
-    let maxValues = maxExplanationsAndMinMaxInputValue(newData.data);
-    newData.maxExplanationValue = maxValues.maxExplanation;
-    newData.maxInputs = maxValues.maxInputValues;
-    newData.minInputs = maxValues.minInputValues;
-
-    return newData;
 };
 
 interface FeatureCategoryTextMapping {
@@ -208,29 +205,24 @@ const loadEngagementData = async (
     dataURL: string,
     smoothWithPredictions: boolean = false
 ) => {
-    try {
-        const credentials = username + ":" + password;
-        const response = await fetch(dataURL, {
-            headers: { Authorization: "Basic " + window.btoa(credentials || "") },
-        });
-        const dataContainer: DataContainerType = await response.json();
+    const credentials = username + ":" + password;
+    const response = await fetch(dataURL, {
+        headers: { Authorization: "Basic " + window.btoa(credentials || "") },
+    });
+    const dataContainer: DataContainerType = await response.json();
 
-        const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate;
-        if (smoothWithPredictions) {
-            dataContainer.data = smoothUsingPredictions(dataContainer, windowSize);
-        } else {
-            dataContainer.data = smoothData(dataContainer.data, windowSize);
-        }
-
-        let maxValues = maxExplanationsAndMinMaxInputValue(dataContainer.data);
-        dataContainer.maxExplanationValue = maxValues.maxExplanation;
-        dataContainer.maxInputs = maxValues.maxInputValues;
-        dataContainer.minInputs = maxValues.minInputValues;
-        return categorize(dataContainer, featuresToCategoryMapping);
-    } catch (e) {
-        console.error("Error loading or smoothing data. Using mocks");
-        return generateMockData() as DataContainerType;
+    const windowSize = AVG_WINDOW_SECONDS * dataContainer.sampleRate;
+    if (smoothWithPredictions) {
+        dataContainer.data = smoothUsingPredictions(dataContainer, windowSize);
+    } else {
+        dataContainer.data = smoothData(dataContainer.data, windowSize);
     }
+
+    let maxValues = maxExplanationsAndMinMaxInputValue(dataContainer.data);
+    dataContainer.maxExplanationValue = maxValues.maxExplanation;
+    dataContainer.maxInputs = maxValues.maxInputValues;
+    dataContainer.minInputs = maxValues.minInputValues;
+    return categorize(dataContainer, featuresToCategoryMapping);
 };
 
 const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: number): DataPointType[] => {
