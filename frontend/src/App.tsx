@@ -59,7 +59,7 @@ class App extends React.Component<{}, StateType> {
         loading: false,
         participantsData: [],
         error: null,
-        paused: false,
+        paused: true,
         showDevSettings: true,
         volume: 1
     };
