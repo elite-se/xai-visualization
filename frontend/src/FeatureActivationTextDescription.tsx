@@ -31,7 +31,8 @@ const Definition = styled.div`
 
 const Emoji = styled.h1`
     margin-right: 4px;
-`;
+    font-family: 'Noto-Color-Emoji', sans-serif;
+`
 
 function FeatureActivationTextDescription(props: {
     categoryIds: string[];

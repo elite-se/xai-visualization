@@ -101,7 +101,7 @@ class NavBar extends React.Component<PropsType> {
                     </ButtonGroup>
                     <NavbarDivider/>
                     <NavbarGroup>
-                        <Button style={{width: 10}} onClick={() => this.props.onPause()}>{!paused ? '⏸' : '▶'}</Button>
+                        <Button icon={paused ? 'play' : 'pause'} onClick={() => this.props.onPause()} />
                         <Icon style={{ margin: '0 10px 0 20px'}} icon={"volume-up"}/>
                         <CustomSlider min={0} max={1} labelRenderer={false} stepSize={0.01}
                                 value={volume} onChange={this.onVolumeChange}/>
