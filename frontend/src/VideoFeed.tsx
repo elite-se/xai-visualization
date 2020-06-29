@@ -57,7 +57,7 @@ class VideoFeed  extends React.Component<PropsType> {
     render() {
         return (
             <VideoContainer>
-                <video controls muted autoPlay onTimeUpdate={this.onTimeUpdate} onSeeked={this.onSeeked} onPlay={this.props.onPlay} onPause={this.props.onPause}>
+                <video ref={this.videoRef} controls muted autoPlay onTimeUpdate={this.onTimeUpdate} onSeeked={this.onSeeked} onPlay={this.props.onPlay} onPause={this.props.onPause}>
                     <source src={this.props.videoURL} type="video/mp4" />
                     Your browser does not support HTML video.
                 </video>

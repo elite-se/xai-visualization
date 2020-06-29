@@ -33,7 +33,8 @@ type StateType = {
     mode: 'bar' | 'cloud';
     participantsData: ParticipantData[],
     loading: boolean,
-    error: Error | null
+    error: Error | null,
+    paused: boolean
 };
 
 class App extends React.Component<{}, StateType> {
@@ -43,7 +44,8 @@ class App extends React.Component<{}, StateType> {
         mode: 'bar',
         loading: false,
         participantsData: [],
-        error: null
+        error: null,
+        paused: false
     };
 
     getEmptyParticipantsData(): ParticipantData[] {
@@ -98,15 +100,11 @@ class App extends React.Component<{}, StateType> {
         }
     };
 
-    onTimeUpdate = (currentTime: number) => {
-
-    }
-
     renderParticipants = () => {
         return this.state.participantsData
             .map((item, index) => item.dataContainer !== null
                 ? <Participant key={"p" + index} dataContainer={item.dataContainer} name={item.name}
-                               videoURL={item.videoURL} mode={this.state.mode} onTimeUpdate={this.onTimeUpdate}/>
+                               videoURL={item.videoURL} mode={this.state.mode} paused={this.state.paused}/>
                 : null)
             .filter(item => !!item)
     };
@@ -119,7 +117,9 @@ class App extends React.Component<{}, StateType> {
                     setPassword={password => this.setState({password})}
                     setMode={mode => this.setState({mode})}
                     loadData={this.loadData}
-                    showDevSettings={!window.location.hash}/>
+                    showDevSettings={!window.location.hash}
+                    paused={this.state.paused}
+                    onPause={() => {this.setState(({paused}) => ({paused: !paused}))}}/>
             <Main>{loading
                 ? <Spinner />
                 : error ? <Card>Some error occurred: ${error.message}</Card> : this.renderParticipants()}</Main>

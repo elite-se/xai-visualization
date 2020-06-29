@@ -26,7 +26,9 @@ type PropsType = {
     setPassword: (password: string) => void;
     setMode: (mode: 'bar' | 'cloud') => void;
     loadData: () => void;
-    showDevSettings: boolean
+    showDevSettings: boolean,
+    paused: boolean,
+    onPause: () => void;
 };
 
 class NavBar extends React.Component<PropsType> {
@@ -60,6 +62,8 @@ class NavBar extends React.Component<PropsType> {
                         <Button active={mode === 'bar'} onClick={() => setMode('bar')}>Bar charts</Button>
                         <Button active={mode === 'cloud'} onClick={() => setMode('cloud')}>Word cloud</Button>
                     </ButtonGroup>
+                    <NavbarDivider/>
+                    <Button active={this.props.paused} onClick={() => {this.props.onPause()}}>Pause</Button>
                 </NavbarGroup>
             </Navbar>
         );

@@ -34,7 +34,7 @@ class Participant extends React.Component<
         videoURL: string; name: string;
         dataContainer: DataContainerType;
         mode: "bar" | "cloud";
-        onTimeUpdate: (t: number) => void
+        paused: boolean
     },
     { currentTime: number }
 > {
@@ -42,7 +42,6 @@ class Participant extends React.Component<
 
     onTimeUpdate = (currentTime: number) => {
         this.setState({ currentTime });
-        this.props.onTimeUpdate(currentTime)
     }
 
     render() {
@@ -56,7 +55,7 @@ class Participant extends React.Component<
             <CustomCard elevation={Elevation.TWO}>
                 <ParticipantLayout>
                     <VideoArea>
-                        <VideoFeed videoURL={videoURL} onSeeked={() => {}} onPause={() => {}} onPlay={() => {}} onTimeUpdate={this.onTimeUpdate} />
+                        <VideoFeed videoURL={videoURL} onSeeked={() => {}} onPause={() => {}} onPlay={() => {}} paused={this.props.paused} onTimeUpdate={this.onTimeUpdate} />
                         <UserInfoContainer>
                             <UserInfo name={name} engagementLevel={outputClass} />
                         </UserInfoContainer>
