@@ -210,6 +210,7 @@ const loadEngagementData = async (
 
     await fetch("https://xai.elite-se.xyz/dologin.html", {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
@@ -217,6 +218,7 @@ const loadEngagementData = async (
     })
     const credentials = username + ":" + password;
     const response = await fetch(dataURL, {
+        credentials: 'include',
         headers: { Authorization: "Basic " + window.btoa(credentials || "") },
     });
     const dataContainer: DataContainerType = await response.json();
