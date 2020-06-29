@@ -203,7 +203,9 @@ const loadEngagementData = async (
     username: string,
     password: string,
     dataURL: string,
-    smoothWithPredictions: boolean = false
+    smoothWithPredictions = false,
+    discretizeValues = false,
+    discretizeOutputOnly = false
 ) => {
     const credentials = username + ":" + password;
     const response = await fetch(dataURL, {
@@ -216,6 +218,10 @@ const loadEngagementData = async (
         dataContainer.data = smoothUsingPredictions(dataContainer, windowSize);
     } else {
         dataContainer.data = smoothData(dataContainer.data, windowSize);
+    }
+
+    if (discretizeValues) {
+        dataContainer.data = discretizeDataPoints(dataContainer.data, dataContainer.sampleRate * 2, discretizeOutputOnly);
     }
 
     let maxValues = maxExplanationsAndMinMaxInputValue(dataContainer.data);
@@ -231,7 +237,8 @@ const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: nu
     let longWindowStart = 0;
     let windowedData: DataPointType[] = [];
     const minWindowSize = 5 * dataContainer.sampleRate;
-    for (var i = 1; i < dataContainer.data.length; i++) {
+    let i;
+    for (i = 1; i < dataContainer.data.length; i++) {
         const prediction = dataContainer.data[i].output.indexOf(Math.max(...dataContainer.data[i].output));
         if (lastOutput !== prediction) {
             if (i - currentWindowStart >= minWindowSize || i + 1 === dataContainer.data.length) {
@@ -251,6 +258,48 @@ const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: nu
     }
     windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
     return windowedData;
+};
+
+const discretizeDataPoints = (data: DataPointType[], intervalFrames: number, outputOnly = false): DataPointType[] => {
+    let inputLength = data[0].input.length;
+    let outputLength = data[0].output.length;
+    let explanationsLength = data[0].explanations.length;
+    const smoothedData: DataPointType[] = Array(data.length);
+    for (let currentIntervalStart = 0; currentIntervalStart < data.length; currentIntervalStart += intervalFrames) {
+        let currentIntervalEnd = currentIntervalStart + intervalFrames;
+        if (currentIntervalEnd > data.length) currentIntervalEnd = data.length;
+        let currentIntervalLength = currentIntervalEnd - currentIntervalStart;
+        if (currentIntervalLength === 0) {
+            break;
+        }
+        let averagePoint: DataPointType = {
+            input: new Array(inputLength).fill(0),
+            output: new Array(outputLength).fill(0),
+            explanations: new Array(explanationsLength).fill(new Array(data[0].explanations[0].length).fill(0))
+        }
+        for (let i = currentIntervalStart; i < currentIntervalEnd; i++) {
+            averagePoint.input = averagePoint.input.map((val, j) => val + data[i].input[j]);
+            averagePoint.output = averagePoint.output.map((val, j) => val + data[i].output[j]);
+            averagePoint.explanations = averagePoint.explanations.map((row, j) =>
+                row.map((val, k) => val + data[i].explanations[j][k])
+            );
+        }
+        averagePoint.input = averagePoint.input.map((val) => val / currentIntervalLength);
+        averagePoint.output = averagePoint.output.map((val) => val / currentIntervalLength);
+        averagePoint.explanations = averagePoint.explanations.map((row) =>
+            row.map((val) => val / currentIntervalLength)
+        );
+
+        for (let i = currentIntervalStart; i < currentIntervalEnd; i++) {
+            if (outputOnly) {
+                smoothedData[i] = data[i];
+                smoothedData[i].output = averagePoint.output;
+            } else {
+                smoothedData[i] = averagePoint;
+            }
+        }
+    }
+    return smoothedData;
 };
 
 export default loadEngagementData;
