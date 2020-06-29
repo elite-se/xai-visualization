@@ -9,6 +9,7 @@ import {
     NavbarDivider,
     NavbarGroup,
     NavbarHeading,
+    Slider,
 } from "@blueprintjs/core";
 import Autocomplete from 'react-autocomplete'
 import {IconNames} from "@blueprintjs/icons";
@@ -36,6 +37,10 @@ const H3 = styled.div`
     margin-left: 6px;
 `;
 
+const CustomSlider = styled(Slider)`
+  width: 100px;
+`
+
 type PropsType = {
     username: string;
     password: string;
@@ -49,16 +54,19 @@ type PropsType = {
     loadData: () => void;
     showDevSettings: boolean,
     paused: boolean,
+    volume: number,
     onPause: () => void;
+    setVolume: (volume: number) => void
 };
 
 class NavBar extends React.Component<PropsType> {
     onUsernameChange = (event: SyntheticEvent<HTMLInputElement>) => this.props.setUsername(event.currentTarget.value)
     onPasswordChange = (event: SyntheticEvent<HTMLInputElement>) => this.props.setPassword(event.currentTarget.value)
     onSessionIdChange = (event: SyntheticEvent<HTMLInputElement>) => this.props.setSessionId(event.currentTarget.value)
+    onVolumeChange = (value: number) => this.props.setVolume(value)
 
     render() {
-        const {mode, username, password, loading, showDevSettings, setMode, sessionId, setSessionId} = this.props
+        const {mode, username, password, loading, showDevSettings, setMode, sessionId, setSessionId, paused, volume} = this.props
         return (
             <Navbar>
                 <NavbarGroup>
@@ -92,9 +100,12 @@ class NavBar extends React.Component<PropsType> {
                         <Button active={mode === 'cloud'} onClick={() => setMode('cloud')}>Word cloud</Button>
                     </ButtonGroup>
                     <NavbarDivider/>
-                    <Button active={this.props.paused} onClick={() => {
-                        this.props.onPause()
-                    }}>Pause</Button>
+                    <NavbarGroup>
+                        <Button style={{width: 10}} onClick={() => this.props.onPause()}>{!paused ? '⏸' : '▶'}</Button>
+                        <Icon style={{ margin: '0 10px 0 20px'}} icon={"volume-up"}/>
+                        <CustomSlider min={0} max={1} labelRenderer={false} stepSize={0.01}
+                                value={volume} onChange={this.onVolumeChange}/>
+                    </NavbarGroup>
                 </NavbarGroup>
             </Navbar>
         );

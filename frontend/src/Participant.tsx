@@ -31,7 +31,8 @@ class Participant extends React.Component<{
     videoURL: string; name: string;
     dataContainer: DataContainerType;
     mode: "bar" | "cloud";
-    paused: boolean
+    paused: boolean,
+    volume: number
 },
     { currentTime: number }> {
     state = {currentTime: 0};
@@ -41,7 +42,7 @@ class Participant extends React.Component<{
     }
 
     render() {
-        const {videoURL, name, dataContainer, mode} = this.props;
+        const {videoURL, name, dataContainer, mode, volume} = this.props;
         const {currentTime} = this.state;
         const dataPoint = dataContainer?.data[Math.floor(currentTime * dataContainer?.sampleRate)];
 
@@ -50,10 +51,8 @@ class Participant extends React.Component<{
         return (
             <CustomCard elevation={Elevation.TWO}>
                 <VideoArea>
-                    <VideoFeed videoURL={videoURL} onSeeked={() => {
-                    }} onPause={() => {
-                    }} onPlay={() => {
-                    }} paused={this.props.paused} onTimeUpdate={this.onTimeUpdate}/>
+                    <VideoFeed videoURL={videoURL} onSeeked={() => {}} onPause={() => {}} onPlay={() => {}}
+                               paused={this.props.paused} volume={volume} onTimeUpdate={this.onTimeUpdate}/>
                     <UserInfoContainer>
                         <UserInfo name={name} engagementLevel={outputClass}/>
                     </UserInfoContainer>

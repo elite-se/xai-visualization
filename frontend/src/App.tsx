@@ -38,7 +38,8 @@ type StateType = {
     loading: boolean,
     error: Error | null,
     paused: boolean,
-    showDevSettings: boolean
+    showDevSettings: boolean,
+    volume: number
 };
 
 class App extends React.Component<{}, StateType> {
@@ -51,7 +52,8 @@ class App extends React.Component<{}, StateType> {
         participantsData: [],
         error: null,
         paused: false,
-        showDevSettings: true
+        showDevSettings: true,
+        volume: 1
     };
 
     getEmptyParticipantsData(): ParticipantData[] {
@@ -112,13 +114,14 @@ class App extends React.Component<{}, StateType> {
         return this.state.participantsData
             .map((item, index) => item.dataContainer !== null
                 ? <Participant key={"p" + index} dataContainer={item.dataContainer} name={item.name}
+                               volume={this.state.volume}
                                videoURL={item.videoURL} mode={this.state.mode} paused={this.state.paused}/>
                 : null)
             .filter(item => !!item)
     };
 
     render() {
-        const {mode, username, password, loading, error, sessionId, showDevSettings} = this.state
+        const {mode, username, password, loading, error, sessionId, showDevSettings, volume, paused} = this.state
         return <Container>
             <NavBar username={username} password={password} mode={mode} loading={loading} sessionId={sessionId}
                     setUsername={username => this.setState({username})}
@@ -127,7 +130,9 @@ class App extends React.Component<{}, StateType> {
                     setMode={mode => this.setState({mode})}
                     loadData={this.handleLoadDataButton}
                     showDevSettings={showDevSettings}
-                    paused={this.state.paused}
+                    paused={paused}
+                    volume={volume}
+                    setVolume={(volume: number) => this.setState({volume})}
                     onPause={() => this.setState(({paused}) => ({paused: !paused}))}/>
             <Main>{loading
                 ? <Spinner/>
