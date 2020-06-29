@@ -19,11 +19,12 @@ const createBarChartOptions = (xAxesMax: number) => {
                         min: 0,
                         max: xAxesMax,
                         minRotation: 0,
+                        stepSize: xAxesMax,
                         maxRotation: 0,
-                        callback: function (value: number, index: any, values: any) {
+                        callback: function (value: number) {
                             if (value === 0) {
                                 return "Not important";
-                            } else if (value === xAxesMax) {
+                            } else if (value === xAxesMax ) {
                                 return "Important";
                             }
                             return undefined;
