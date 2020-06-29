@@ -1,10 +1,12 @@
 import React from "react";
 import Participant from "./Participant";
 import styled from "styled-components";
-import loadEngagementData, {DataContainerType} from "./loadEngagementData";
+import loadEngagementData, { DataContainerType } from "./loadEngagementData";
 import getHashParams from "./getHashParams";
 import NavBar from "./NavBar";
-import {Card, Spinner} from "@blueprintjs/core";
+import { Card, Spinner } from "@blueprintjs/core";
+import { genders } from "./genderData";
+import { Gender } from "./FeaturesToTextMapping";
 
 const Container = styled.div`
     display: flex;
@@ -27,7 +29,13 @@ const Main = styled.main`
     overflow: hidden;
 `;
 
-type ParticipantData = { name: string; videoURL: string; dataURL: string; dataContainer: DataContainerType | null };
+type ParticipantData = {
+    name: string;
+    gender: Gender;
+    videoURL: string;
+    dataURL: string;
+    dataContainer: DataContainerType | null;
+};
 
 type StateType = {
     username: string;
@@ -47,7 +55,7 @@ class App extends React.Component<{}, StateType> {
         username: "",
         password: "",
         sessionId: "008_2016-03-23_Paris",
-        mode: 'bar',
+        mode: "bar",
         loading: false,
         participantsData: [],
         error: null,
@@ -57,55 +65,60 @@ class App extends React.Component<{}, StateType> {
     };
 
     getEmptyParticipantsData(): ParticipantData[] {
-        const {username, password, sessionId} = this.state
+        const { username, password, sessionId } = this.state;
         return [
             {
-                name: "Ian Jackson",
+                name: genders[sessionId].expert.name,
+                gender: genders[sessionId].expert.gender,
                 videoURL: `https://${username}:${password}@xn--ls8h.maxammann.org/${sessionId}/expert.video.mp4`,
                 dataURL: `https://xn--ls8h.maxammann.org/${sessionId}-expert.json`,
-                dataContainer: null
+                dataContainer: null,
             },
             {
-                name: "Allister McCrane",
+                name: genders[sessionId].novice.name,
+                gender: genders[sessionId].novice.gender,
                 videoURL: `https://${username}:${password}@xn--ls8h.maxammann.org/${sessionId}/novice.video.mp4`,
                 dataURL: `https://xn--ls8h.maxammann.org/${sessionId}-novice.json`,
-                dataContainer: null
-            }
-        ]
+                dataContainer: null,
+            },
+        ];
     }
 
     componentDidMount() {
         if (window.location.hash) {
             try {
-                const {username, password, sessionId} = getHashParams()
-                const newState: any = {username, password, showDevSettings: false}
+                const { username, password, sessionId } = getHashParams()
+                const newState: any = { username, password, showDevSettings: false }
                 if (sessionId) newState.sessionId = sessionId
                 this.setState(newState, this.loadData)
             } catch {
-                console.error('Could not parse hash params.')
+                console.error("Could not parse hash params.");
             }
         }
     }
 
     loadData = async () => {
-        this.setState({loading: true})
+        this.setState({ loading: true });
         try {
-            const participantsData = this.getEmptyParticipantsData()
+            const participantsData = this.getEmptyParticipantsData();
             for (let pData of participantsData) {
                 pData.dataContainer = await loadEngagementData(
-                    this.state.username, this.state.password, pData.dataURL, false
+                    this.state.username,
+                    this.state.password,
+                    pData.dataURL,
+                    false
                 );
             }
-            this.setState({participantsData});
+            this.setState({ participantsData });
         } catch (error) {
-            this.setState({error})
+            this.setState({ error });
         } finally {
-            this.setState({loading: false})
+            this.setState({ loading: false });
         }
     };
 
     handleLoadDataButton = async () => {
-        const {username, password, sessionId} = this.state
+        const { username, password, sessionId } = this.state
         window.location.hash = `#username=${username}&password=${password}&sessionId=${sessionId}`
         await this.loadData()
     }
@@ -113,29 +126,29 @@ class App extends React.Component<{}, StateType> {
     renderParticipants = () => {
         return this.state.participantsData
             .map((item, index) => item.dataContainer !== null
-                ? <Participant key={"p" + index} dataContainer={item.dataContainer} name={item.name}
-                               volume={this.state.volume}
-                               videoURL={item.videoURL} mode={this.state.mode} paused={this.state.paused}/>
+                ? <Participant key={"p" + index} dataContainer={item.dataContainer} name={item.name} gender={item.gender}
+                    volume={this.state.volume}
+                    videoURL={item.videoURL} mode={this.state.mode} paused={this.state.paused} />
                 : null)
             .filter(item => !!item)
     };
 
     render() {
-        const {mode, username, password, loading, error, sessionId, showDevSettings, volume, paused} = this.state
+        const { mode, username, password, loading, error, sessionId, showDevSettings, volume, paused } = this.state
         return <Container>
             <NavBar username={username} password={password} mode={mode} loading={loading} sessionId={sessionId}
-                    setUsername={username => this.setState({username})}
-                    setPassword={password => this.setState({password})}
-                    setSessionId={sessionId => this.setState({sessionId})}
-                    setMode={mode => this.setState({mode})}
-                    loadData={this.handleLoadDataButton}
-                    showDevSettings={showDevSettings}
-                    paused={paused}
-                    volume={volume}
-                    setVolume={(volume: number) => this.setState({volume})}
-                    onPause={() => this.setState(({paused}) => ({paused: !paused}))}/>
+                setUsername={username => this.setState({ username })}
+                setPassword={password => this.setState({ password })}
+                setSessionId={sessionId => this.setState({ sessionId })}
+                setMode={mode => this.setState({ mode })}
+                loadData={this.handleLoadDataButton}
+                showDevSettings={showDevSettings}
+                paused={paused}
+                volume={volume}
+                setVolume={(volume: number) => this.setState({ volume })}
+                onPause={() => this.setState(({ paused }) => ({ paused: !paused }))} />
             <Main>{loading
-                ? <Spinner/>
+                ? <Spinner />
                 : error ? <Card>Some error occurred: ${error.message}</Card> : this.renderParticipants()}</Main>
         </Container>
     }

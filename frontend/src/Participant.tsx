@@ -1,15 +1,15 @@
 import React from "react";
-import {Card, Elevation} from "@blueprintjs/core";
+import { Card, Elevation } from "@blueprintjs/core";
 import VideoFeed from "./VideoFeed";
 import ExplanationsContainer from "./ExplanationsContainer";
 import styled from "styled-components";
-import {DataContainerType} from "./loadEngagementData";
+import { DataContainerType } from "./loadEngagementData";
 import UserInfo from "./UserInfo";
-
+import { Gender } from "./FeaturesToTextMapping";
 
 const VideoArea = styled.div`
-  position: relative;
-  flex: 45;
+    position: relative;
+    flex: 45;
 `;
 
 const UserInfoContainer = styled.div`
@@ -19,16 +19,17 @@ const UserInfoContainer = styled.div`
 `;
 
 const CustomCard = styled(Card)`
-  display: flex;
-  margin: 10px 0;
-  width: 100%;
-  padding: 0;
-  overflow: hidden;
-  flex: 1;
-`
+    display: flex;
+    margin: 10px 0;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    flex: 1;
+`;
 
 class Participant extends React.Component<{
     videoURL: string; name: string;
+        gender: Gender;
     dataContainer: DataContainerType;
     mode: "bar" | "cloud";
     paused: boolean,
@@ -38,8 +39,8 @@ class Participant extends React.Component<{
     state = {currentTime: 0};
 
     onTimeUpdate = (currentTime: number) => {
-        this.setState({currentTime});
-    }
+        this.setState({ currentTime });
+    };
 
     render() {
         const {videoURL, name, dataContainer, mode, volume} = this.props;
@@ -54,7 +55,7 @@ class Participant extends React.Component<{
                     <VideoFeed videoURL={videoURL} onSeeked={() => {}} onPause={() => {}} onPlay={() => {}}
                                paused={this.props.paused} volume={volume} onTimeUpdate={this.onTimeUpdate}/>
                     <UserInfoContainer>
-                        <UserInfo name={name} engagementLevel={outputClass}/>
+                        <UserInfo name={name} engagementLevel={outputClass} />
                     </UserInfoContainer>
                 </VideoArea>
                 <ExplanationsContainer
@@ -62,6 +63,7 @@ class Participant extends React.Component<{
                     dataPoint={dataPoint}
                     mode={mode}
                     username={name}
+                    gender={this.props.gender}
                     maxExplanationValue={dataContainer.maxExplanationValue}
                     minInputValues={dataContainer.minInputs}
                     maxInputValues={dataContainer.maxInputs}
