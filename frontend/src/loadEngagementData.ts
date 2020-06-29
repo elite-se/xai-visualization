@@ -213,7 +213,7 @@ const loadEngagementData = async (
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: "httpd_username=gruppe1&httpd_password=Rion5iquit%21Ndo"
+        body: `httpd_username=${username}&httpd_password=${encodeURIComponent(password)}`
     })
     const credentials = username + ":" + password;
     const response = await fetch(dataURL, {
