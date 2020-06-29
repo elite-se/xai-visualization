@@ -174,7 +174,7 @@ const activationLiteral = (activation: number, literals: string[]) => {
 };
 
 const activationClause = (category: FeatureCategoryTextMapping, activationValue: number, gender: Gender) => {
-    if (activationValue > 1 || activationValue < 0)
+    if (activationValue > 1 || activationValue < 0 || isNaN(activationValue))
         console.log("Activation is not between 0 and 1!", category.id, activationValue);
     return {
         activationClausePrefix: category.multiplicity === FeatureCategoryMultiplicity.SINGULAR ? "is " : "are ",

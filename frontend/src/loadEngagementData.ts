@@ -1,5 +1,5 @@
 import generateMockData from "./generateMockData";
-import {uniq} from 'lodash'
+import { uniq } from "lodash";
 
 export type DataPointType = { input: number[]; output: number[]; explanations: number[][] };
 
@@ -7,7 +7,9 @@ export type DataContainerType = {
     sampleRate: number;
     labels: string[];
     data: DataPointType[];
-    maxExplanationValue?: number;
+    maxExplanationValue: number;
+    maxInputs: number[];
+    minInputs: number[];
 };
 
 const AVG_WINDOW_SECONDS = 5; // Moving Average Window Size in seconds
@@ -25,7 +27,7 @@ const smoothData = (data: DataPointType[], windowSize: number): DataPointType[] 
             const smoothedInput = data[i].input.map((val, j) => (smoothedData[i - 1].input[j] * i + val) / (i + 1));
             const smoothedOutput = data[i].output.map((val, j) => (smoothedData[i - 1].output[j] * i + val) / (i + 1));
 
-            smoothedData[i] = {explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput};
+            smoothedData[i] = { explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput };
         } else {
             // Formula: smoothedData[i - 1] + (data[i] - data[i-windowSize]) / windowSize
             const smoothedExplanations = data[i].explanations.map((row, j) =>
@@ -42,14 +44,23 @@ const smoothData = (data: DataPointType[], windowSize: number): DataPointType[] 
                 (val, j) => smoothedData[i - 1].output[j] + (val - data[i - windowSize].output[j]) / windowSize
             );
 
-            smoothedData[i] = {explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput};
+            smoothedData[i] = { explanations: smoothedExplanations, input: smoothedInput, output: smoothedOutput };
         }
     }
     return smoothedData;
 };
 
-const maxExplanationsValue = (data: DataPointType[]) => {
+const maxExplanationsAndMinMaxInputValue = (data: DataPointType[]) => {
+    //initial values
     let max = data[0].explanations[0][0];
+    let maxInputs = Array(data[0].input.length);
+    let minInputs = Array(data[0].input.length);
+
+    for (let y = 0; y < data[0].input.length; y++) {
+        maxInputs[y] = data[0].input[y];
+        minInputs[y] = data[0].input[y];
+    }
+
     for (let i = 0; i < data.length; i++) {
         for (let j = 0; j < data[i].explanations.length; j++) {
             for (let k = 0; k < data[i].explanations[j].length; k++) {
@@ -58,27 +69,42 @@ const maxExplanationsValue = (data: DataPointType[]) => {
                 }
             }
         }
+        //activation maximum and minimum
+        for (let x = 0; x < data[i].input.length; x++) {
+            if (data[i].input[x] > maxInputs[x]) {
+                maxInputs[x] = data[i].input[x];
+            } else if (data[i].input[x] < minInputs[x]) {
+                minInputs[x] = data[i].input[x];
+            }
+        }
     }
 
-    return max;
+    return {
+        maxExplanation: max,
+        maxInputValues: maxInputs,
+        minInputValues: minInputs,
+    };
 };
 
 const categorize = (oldData: DataContainerType, mapping: FeatureCategoryTextMapping[]): DataContainerType => {
-    const labels = uniq(oldData.labels.map((label: string) => {
-        const foundMapping = mapping.find(mapping => mapping.features.includes(label))
-        if (!foundMapping) {
-            console.error("There is no category for feature " + label)
-            throw Error()
-        }
-        return foundMapping.id;
-    }))
+    const labels = uniq(
+        oldData.labels.map((label: string) => {
+            const foundMapping = mapping.find((mapping) => mapping.features.includes(label));
+            if (!foundMapping) {
+                console.error("There is no category for feature " + label);
+                throw Error();
+            }
+            return foundMapping.id;
+        })
+    );
+
     const newData: DataContainerType = {
         sampleRate: oldData.sampleRate,
         labels: labels,
-        data: oldData.data.map(dataPoint => {
-            const newExplanations = []
+        data: oldData.data.map((dataPoint) => {
+            const newExplanations = [];
             for (const clazz of dataPoint.explanations) {
-                const newClazz = []
+                const newClazz = [];
                 for (const info of mapping) {
                     newClazz.push(
                         info.aggregateFunction(
@@ -86,10 +112,10 @@ const categorize = (oldData: DataContainerType, mapping: FeatureCategoryTextMapp
                         )
                     );
                 }
-                newExplanations.push(newClazz)
+                newExplanations.push(newClazz);
             }
 
-            const newInput = []
+            const newInput = [];
             for (const info of mapping) {
                 newInput.push(
                     info.aggregateFunction(
@@ -98,84 +124,94 @@ const categorize = (oldData: DataContainerType, mapping: FeatureCategoryTextMapp
                 );
             }
 
-
             const newDataPoint: DataPointType = {
                 input: newInput,
                 output: dataPoint.output,
-                explanations: newExplanations
-            }
+                explanations: newExplanations,
+            };
             return newDataPoint;
-        })
-    }
+        }),
+        maxExplanationValue: 0,
+        maxInputs: [],
+        minInputs: [],
+    };
 
-    newData.maxExplanationValue = maxExplanationsValue(newData.data)
+    let maxValues = maxExplanationsAndMinMaxInputValue(newData.data);
+    newData.maxExplanationValue = maxValues.maxExplanation;
+    newData.maxInputs = maxValues.maxInputValues;
+    newData.minInputs = maxValues.minInputValues;
 
-    return newData
-}
+    return newData;
+};
 
 interface FeatureCategoryTextMapping {
     id: string;
     features: string[];
-    aggregateFunction: ((featureValues: number[]) => number)
+    aggregateFunction: (featureValues: number[]) => number;
 }
-
 
 const average = (featureValues: number[]) => {
-    return featureValues.reduce((acc, value) => acc + value, 0) / featureValues.length
-}
+    return featureValues.reduce((acc, value) => acc + value, 0) / featureValues.length;
+};
 
 const featuresToCategoryMapping: FeatureCategoryTextMapping[] = [
     {
         id: "Gaze",
-        features: ['1 face horizontal movement (emax)',
-            '2 face vertical movement (emax)'],
-        aggregateFunction: average
+        features: ["1 face horizontal movement (emax)", "2 face vertical movement (emax)"],
+        aggregateFunction: average,
     },
     {
         id: "Smile",
-        features: ['0 Valence from Face (emax)'],
-        aggregateFunction: average
+        features: ["0 Valence from Face (emax)"],
+        aggregateFunction: average,
     },
     {
         id: "Voice",
-        features: ['15 voice activity'],
-        aggregateFunction: average
+        features: ["15 voice activity"],
+        aggregateFunction: average,
     },
     {
         id: "Armscrossed",
-        features: ['3 armscrossed'],
-        aggregateFunction: average
+        features: ["3 armscrossed"],
+        aggregateFunction: average,
     },
     {
         id: "Headtouch",
-        features: ['4 headtouch'],
-        aggregateFunction: average
+        features: ["4 headtouch"],
+        aggregateFunction: average,
     },
     {
         id: "BodyOpenness",
-        features: ['5 distance left hand left hip',
-            '6 distance right hand right hip',
-            '9 hand in front of left hip',
-            '10 hand in front of right hip'],
-        aggregateFunction: average
+        features: [
+            "5 distance left hand left hip",
+            "6 distance right hand right hip",
+            "9 hand in front of left hip",
+            "10 hand in front of right hip",
+        ],
+        aggregateFunction: average,
     },
     {
         id: "Restlessness",
-        features: ['16 Skeleton overall activation'],
+        features: ["16 Skeleton overall activation"],
         aggregateFunction: average,
     },
     {
         id: "Gesticulation",
-        features: ['17 Skeleton energy global max'],
-        aggregateFunction: average
-    }
-]
+        features: ["17 Skeleton energy global max"],
+        aggregateFunction: average,
+    },
+];
 
-const loadEngagementData = async (username: string, password: string, dataURL: string, smoothWithPredictions: boolean = false) => {
+const loadEngagementData = async (
+    username: string,
+    password: string,
+    dataURL: string,
+    smoothWithPredictions: boolean = false
+) => {
     try {
         const credentials = username + ":" + password;
         const response = await fetch(dataURL, {
-            headers: {Authorization: "Basic " + window.btoa(credentials || "")},
+            headers: { Authorization: "Basic " + window.btoa(credentials || "") },
         });
         const dataContainer: DataContainerType = await response.json();
 
@@ -186,7 +222,10 @@ const loadEngagementData = async (username: string, password: string, dataURL: s
             dataContainer.data = smoothData(dataContainer.data, windowSize);
         }
 
-        dataContainer.maxExplanationValue = maxExplanationsValue(dataContainer.data);
+        let maxValues = maxExplanationsAndMinMaxInputValue(dataContainer.data);
+        dataContainer.maxExplanationValue = maxValues.maxExplanation;
+        dataContainer.maxInputs = maxValues.maxInputValues;
+        dataContainer.minInputs = maxValues.minInputValues;
         return categorize(dataContainer, featuresToCategoryMapping);
     } catch (e) {
         console.error("Error loading or smoothing data. Using mocks");
@@ -205,10 +244,14 @@ const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: nu
         if (lastOutput !== prediction) {
             if (i - currentWindowStart >= minWindowSize || i + 1 === dataContainer.data.length) {
                 if (longWindowStart < currentWindowStart) {
-                    windowedData = windowedData.concat(smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize));
+                    windowedData = windowedData.concat(
+                        smoothData(dataContainer.data.slice(longWindowStart, currentWindowStart), windowSize)
+                    );
                     longWindowStart = i;
                 }
-                windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
+                windowedData = windowedData.concat(
+                    smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize)
+                );
             }
             lastOutput = prediction;
             currentWindowStart = i;
@@ -216,6 +259,6 @@ const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: nu
     }
     windowedData = windowedData.concat(smoothData(dataContainer.data.slice(currentWindowStart, i), windowSize));
     return windowedData;
-}
+};
 
 export default loadEngagementData;

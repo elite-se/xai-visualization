@@ -63,10 +63,9 @@ function FeatureActivationTextDescription(props: {
         );
 
         activationSpans.push(
-            <span>
+            <span key={activation.categoryId}>
                 {activation.prefix}
                 <Popover
-                    key={activation.categoryId}
                     interactionKind={PopoverInteractionKind.HOVER}
                     hoverOpenDelay={50}
                     hoverCloseDelay={50}

@@ -57,6 +57,8 @@ class Participant extends React.Component<
                             username={name}
                             // @ts-ignore
                             maxExplanationValue={dataContainer.maxExplanationValue}
+                            minInputValues={dataContainer.minInputs}
+                            maxInputValues={dataContainer.maxInputs}
                         />
                     )}
                 </ParticipantLayout>

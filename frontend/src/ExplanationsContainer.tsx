@@ -205,10 +205,30 @@ const calculateBlur = (confidence: number) => {
     return entry[1];
 };
 
+const normalize = (inArr: number[], mins: number[], maxs: number[]) => {
+    if (!(inArr.length === mins.length && inArr.length === maxs.length)) return inArr; //can't normalize with not equal length arrays
+    let retArr = Array(inArr.length);
+    for (let i = 0; i < inArr.length; i++) {
+        retArr[i] = (inArr[i] - mins[i]) / (maxs[i] - mins[i]);
+        if (retArr[i] < 0 || retArr[i] > 1)
+            console.log(
+                "Something went wrong during normalisation @index: " +
+                    i +
+                    ", value: " +
+                    inArr[i] +
+                    ", normalized: " +
+                    retArr[i]
+            );
+    }
+    return retArr;
+};
+
 function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] };
     labels: string[];
     maxExplanationValue: number;
+    minInputValues: number[];
+    maxInputValues: number[];
     mode: "bar" | "cloud";
     username: string;
 }) {
@@ -216,9 +236,11 @@ function ExplanationsContainer(props: {
     const strongestOutputIdx = output.indexOf(Math.max(...output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
 
+    let input_normalized = normalize(input, props.minInputValues, props.maxInputValues);
+
     const strongestOutputExplanations = sortAndSelectTopmostFeatures(
         props.labels,
-        input,
+        input_normalized,
         explanations[strongestOutputIdx],
         3,
         0.2,
