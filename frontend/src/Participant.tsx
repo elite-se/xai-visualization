@@ -30,12 +30,20 @@ const CustomCard = styled(Card)`
 `
 
 class Participant extends React.Component<
-    { videoURL: string; name: string; dataContainer: DataContainerType; mode: "bar" | "cloud" },
+    {
+        videoURL: string; name: string;
+        dataContainer: DataContainerType;
+        mode: "bar" | "cloud";
+        onTimeUpdate: (t: number) => void
+    },
     { currentTime: number }
 > {
     state = { currentTime: 0 };
 
-    onTimeUpdate = (currentTime: number) => this.setState({ currentTime });
+    onTimeUpdate = (currentTime: number) => {
+        this.setState({ currentTime });
+        this.props.onTimeUpdate(currentTime)
+    }
 
     render() {
         const { videoURL, name, dataContainer, mode } = this.props;
@@ -48,7 +56,7 @@ class Participant extends React.Component<
             <CustomCard elevation={Elevation.TWO}>
                 <ParticipantLayout>
                     <VideoArea>
-                        <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate} />
+                        <VideoFeed videoURL={videoURL} onSeeked={() => {}} onPause={() => {}} onPlay={() => {}} onTimeUpdate={this.onTimeUpdate} />
                         <UserInfoContainer>
                             <UserInfo name={name} engagementLevel={outputClass} />
                         </UserInfoContainer>

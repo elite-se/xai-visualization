@@ -98,11 +98,15 @@ class App extends React.Component<{}, StateType> {
         }
     };
 
+    onTimeUpdate = (currentTime: number) => {
+
+    }
+
     renderParticipants = () => {
         return this.state.participantsData
             .map((item, index) => item.dataContainer !== null
                 ? <Participant key={"p" + index} dataContainer={item.dataContainer} name={item.name}
-                               videoURL={item.videoURL} mode={this.state.mode}/>
+                               videoURL={item.videoURL} mode={this.state.mode} onTimeUpdate={this.onTimeUpdate}/>
                 : null)
             .filter(item => !!item)
     };

@@ -1,5 +1,6 @@
-import React, { SyntheticEvent } from "react";
+import React, {RefObject, SyntheticEvent} from "react";
 import styled from "styled-components";
+import {DataContainerType} from "./loadEngagementData";
 
 const VideoContainer = styled.div`
     /* TODO: this should probably be passed in from somewhere 
@@ -24,18 +25,45 @@ const VideoContainer = styled.div`
     }
 `;
 
-function VideoFeed(props: { videoURL: string; onTimeUpdate: (t: number) => void }) {
-    const onTimeUpdate = (event: SyntheticEvent<HTMLVideoElement>) =>
-        props.onTimeUpdate(event.currentTarget.currentTime);
+type PropsType = { videoURL: string; onTimeUpdate: (t: number) => void,
+    paused?: boolean,
+    onPlay: () => void, onPause: () => void, onSeeked: (t: number) => void }
 
-    return (
-        <VideoContainer>
-            <video controls muted autoPlay onTimeUpdate={onTimeUpdate}>
-                <source src={props.videoURL} type="video/mp4" />
-                Your browser does not support HTML video.
-            </video>
-        </VideoContainer>
-    );
+class VideoFeed  extends React.Component<PropsType> {
+    videoRef: React.RefObject<HTMLVideoElement>
+    constructor (props: PropsType) {
+        super(props);
+        this.videoRef = React.createRef<HTMLVideoElement>();
+    }
+
+    componentDidUpdate(prevProps: PropsType) {
+        if (this.props.paused !== prevProps.paused) {
+            if (this.videoRef.current) {
+                if (this.props.paused) {
+                    this.videoRef.current.pause();
+                } else {
+                    this.videoRef.current.play();
+                }
+            }
+        }
+    }
+
+    onTimeUpdate = (event: SyntheticEvent<HTMLVideoElement>) =>
+        this.props.onTimeUpdate(event.currentTarget.currentTime);
+
+    onSeeked = (event: SyntheticEvent<HTMLVideoElement>) =>
+        this.props.onSeeked(event.currentTarget.currentTime);
+
+    render() {
+        return (
+            <VideoContainer>
+                <video controls muted autoPlay onTimeUpdate={this.onTimeUpdate} onSeeked={this.onSeeked} onPlay={this.props.onPlay} onPause={this.props.onPause}>
+                    <source src={this.props.videoURL} type="video/mp4" />
+                    Your browser does not support HTML video.
+                </video>
+            </VideoContainer>
+        );
+    }
 }
 
 export default VideoFeed;
