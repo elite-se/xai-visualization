@@ -149,7 +149,7 @@ class App extends React.Component<{}, StateType> {
                 onPause={() => this.setState(({ paused }) => ({ paused: !paused }))} />
             <Main>{loading
                 ? <Spinner />
-                : error ? <Card>Some error occurred: ${error.message}</Card> : this.renderParticipants()}</Main>
+                : error ? <Card>Some error occurred: {error.message}</Card> : this.renderParticipants()}</Main>
         </Container>
     }
 }
