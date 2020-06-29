@@ -47,6 +47,7 @@ const ChartContainer = styled.div`
     justify-content: space-evenly;
     width: 60%;
     flex-grow: 1;
+    overflow: hidden;
     transition: 0.2s filter linear, 0.2s -webkit-filter linear;
     filter: blur(0px);
 `;

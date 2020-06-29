@@ -18,6 +18,8 @@ const createBarChartOptions = (xAxesMax: number) => {
                     ticks: {
                         min: 0,
                         max: xAxesMax,
+                        minRotation: 0,
+                        maxRotation: 0,
                         callback: function (value: number, index: any, values: any) {
                             if (value === 0) {
                                 return "Not important";
