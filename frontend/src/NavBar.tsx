@@ -10,8 +10,27 @@ import {
     NavbarGroup,
     NavbarHeading,
 } from "@blueprintjs/core";
+import Autocomplete from 'react-autocomplete'
 import {IconNames} from "@blueprintjs/icons";
 import styled from "styled-components";
+
+const SESSION_IDS = [
+    '001_2016-03-17_Paris',
+    '002_2016-03-17_Paris',
+    '003_2016-03-17_Paris',
+    '004_2016-03-18_Paris',
+    '005_2016-03-18_Paris',
+    '006_2016-03-18_Paris',
+    '007_2016-03-21_Paris',
+    '008_2016-03-23_Paris',
+    '009_2016-03-25_Paris',
+    '027_2016-04-06_Nottingham',
+    '030_2016-04-06_Nottingham',
+    '034_2016-04-07_Nottingham',
+    '066_2016-05-23_Augsburg',
+    '072_2016-05-23_Augsburg',
+    '076_2016-05-24_Augsburg',
+]
 
 const H3 = styled.div`
     margin-left: 6px;
@@ -20,10 +39,12 @@ const H3 = styled.div`
 type PropsType = {
     username: string;
     password: string;
+    sessionId: string;
     mode: 'bar' | 'cloud';
     loading: boolean;
     setUsername: (username: string) => void;
     setPassword: (password: string) => void;
+    setSessionId: (sessionId: string) => void;
     setMode: (mode: 'bar' | 'cloud') => void;
     loadData: () => void;
     showDevSettings: boolean,
@@ -34,9 +55,10 @@ type PropsType = {
 class NavBar extends React.Component<PropsType> {
     onUsernameChange = (event: SyntheticEvent<HTMLInputElement>) => this.props.setUsername(event.currentTarget.value)
     onPasswordChange = (event: SyntheticEvent<HTMLInputElement>) => this.props.setPassword(event.currentTarget.value)
+    onSessionIdChange = (event: SyntheticEvent<HTMLInputElement>) => this.props.setSessionId(event.currentTarget.value)
 
     render() {
-        const {mode, username, password, loading, showDevSettings, setMode} = this.props
+        const {mode, username, password, loading, showDevSettings, setMode, sessionId, setSessionId} = this.props
         return (
             <Navbar>
                 <NavbarGroup>
@@ -46,12 +68,19 @@ class NavBar extends React.Component<PropsType> {
                     </NavbarHeading>
                     <NavbarDivider/>
                     {showDevSettings && <>
-                        <ButtonGroup>
-                            <Button icon="document-open" onClick={() => alert("tbd")}>
-                                Open...
-                            </Button>
-                        </ButtonGroup>
-                        <NavbarDivider/>
+                        <Autocomplete
+                            items={SESSION_IDS}
+                            shouldItemRender={() => true}
+                            getItemValue={(item: string) => item}
+                            renderItem={(item: string, highlighted: boolean) =>
+                                <div key={item} style={{backgroundColor: highlighted ? '#eee' : 'transparent'}}>
+                                    {item}
+                                </div>}
+                            value={sessionId}
+                            onChange={this.onSessionIdChange}
+                            renderInput={({ref, ...props}: any) => <InputGroup placeholder='Session Id' {...props}
+                                                                               inputRef={ref}/>}
+                            onSelect={(id: string) => setSessionId(id)}/>
                         <InputGroup placeholder="Username" onChange={this.onUsernameChange} value={username}/>
                         <InputGroup placeholder="Password" type="password" onChange={this.onPasswordChange}
                                     value={password}/>
@@ -63,7 +92,9 @@ class NavBar extends React.Component<PropsType> {
                         <Button active={mode === 'cloud'} onClick={() => setMode('cloud')}>Word cloud</Button>
                     </ButtonGroup>
                     <NavbarDivider/>
-                    <Button active={this.props.paused} onClick={() => {this.props.onPause()}}>Pause</Button>
+                    <Button active={this.props.paused} onClick={() => {
+                        this.props.onPause()
+                    }}>Pause</Button>
                 </NavbarGroup>
             </Navbar>
         );
