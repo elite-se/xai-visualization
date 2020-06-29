@@ -71,7 +71,7 @@ export const featuresToTextMapping: FeatureCategoryTextMapping[] = [
         type: FeatureCategoryType.POSSESSIVE,
         multiplicity: FeatureCategoryMultiplicity.PLURAL,
         literal: "arms",
-        textRepresentations: ["open", "partly crossed", "crossed"],
+        textRepresentations: ["crossed", "partly crossed", "open"],
         emoji: "🙅",
     },
     {
@@ -206,7 +206,7 @@ const genderClause = (type: FeatureCategoryType, gender: Gender, forcePossessive
 /**
  * Generates a sentence describing the given feature-categories' values for a specific person.
  * e.g.: "Simon's gaze is very focused and he is actively talking."
- * 
+ *
  * Follows this approximate grammatic:
     description: <name><category.type == possessive ? "\'s" : ""> <category-clause[category]> <activation-clause[category]> [and <genderClause[category_i]> <category-clause[category_i]> <activation-clause[category_i]>]*
 
@@ -214,13 +214,13 @@ const genderClause = (type: FeatureCategoryType, gender: Gender, forcePossessive
     category-clause[category.type == active]: " " //single space
 
     activation-clause: <category.multiplicity == singular ? "is" : "are"> <activation-literal[category]>
-        
+
     activation-literal: <category.low> | <category.medium> | <category.high>
-        
+
     genderClause[category.type==possessive]: his | her
     genderClause[category.type==active]: he | she
- * 
- * 
+ *
+ *
  * @param categoryIds - string[]
  * @param categoryValues - number[] representing the activation of each category.
  *                            expects the numbers to be between 0.0 and 1.0, 0 will be mapped to low values of the category
