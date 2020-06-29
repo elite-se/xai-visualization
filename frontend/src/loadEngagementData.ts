@@ -168,17 +168,7 @@ const featuresToCategoryMapping: FeatureCategoryTextMapping[] = [
         id: "Gesticulation",
         features: ['17 Skeleton energy global max'],
         aggregateFunction: average
-    },
-    {
-        id: "Undefined",
-        features: ['7 left elbow y rotation',
-            '8 right elbow y rotation',
-            '11 left elbow x rotation',
-            '12 right elbow x rotation',
-            '13 standard deviation head x position',
-            '14 standard deviation head x rotation',],
-        aggregateFunction: average
-    },
+    }
 ]
 
 const loadEngagementData = async (username: string, password: string, dataURL: string, smoothWithPredictions: boolean = false) => {

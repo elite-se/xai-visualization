@@ -45,13 +45,13 @@ class App extends React.Component<{}, StateType> {
             {
                 name: "Ian Jackson",
                 videoURL: "https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/expert.video.mp4",
-                dataURL: "https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/lime-expert.video.mp4.json",
+                dataURL: "https://xn--ls8h.maxammann.org/001_2016-03-17_Paris-expert.json",
                 dataContainer: null,
             },
             {
                 name: "Allister McCrane",
                 videoURL: "https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/novice.video.mp4",
-                dataURL: "https://xn--ls8h.maxammann.org/001_2016-03-17_Paris/lime-novice.video.mp4.json",
+                dataURL: "https://xn--ls8h.maxammann.org/001_2016-03-17_Paris-novice.json",
                 dataContainer: null,
             },
         ],
