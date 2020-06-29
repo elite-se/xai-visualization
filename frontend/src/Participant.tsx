@@ -24,6 +24,11 @@ const UserInfoContainer = styled.div`
     margin: 0;
 `;
 
+const CustomCard = styled(Card)`
+  margin-top: 20px;
+  flex: 1;
+`
+
 class Participant extends React.Component<
     { videoURL: string; name: string; dataContainer: DataContainerType; mode: "bar" | "cloud" },
     { currentTime: number }
@@ -39,9 +44,8 @@ class Participant extends React.Component<
 
         const outputClass = dataPoint ? dataPoint.output.indexOf(Math.max(...dataPoint.output)) : 4;
 
-        // @ts-ignore
         return (
-            <Card elevation={Elevation.TWO}>
+            <CustomCard elevation={Elevation.TWO}>
                 <ParticipantLayout>
                     <VideoArea>
                         <VideoFeed videoURL={videoURL} onTimeUpdate={this.onTimeUpdate} />
@@ -55,14 +59,13 @@ class Participant extends React.Component<
                             dataPoint={dataPoint}
                             mode={mode}
                             username={name}
-                            // @ts-ignore
                             maxExplanationValue={dataContainer.maxExplanationValue}
                             minInputValues={dataContainer.minInputs}
                             maxInputValues={dataContainer.maxInputs}
                         />
                     )}
                 </ParticipantLayout>
-            </Card>
+            </CustomCard>
         );
     }
 }

@@ -1,37 +1,28 @@
 import React, {SyntheticEvent} from "react";
 import Participant from "./Participant";
-
-import {
-    Button,
-    ButtonGroup,
-    Icon,
-    InputGroup,
-    Navbar,
-    NavbarDivider,
-    NavbarGroup,
-    NavbarHeading,
-} from "@blueprintjs/core";
-import {IconNames} from "@blueprintjs/icons";
 import styled from "styled-components";
 import loadEngagementData, {DataContainerType} from "./loadEngagementData";
 import getHashParams from "./getHashParams";
+import NavBar from "./NavBar";
+import {Card, Spinner} from "@blueprintjs/core";
 
 const Container = styled.div`
-    min-height: 100vh;
+    display: flex;
+    height: 100vh;
     width: 100%;
     box-sizing: border-box;
+    flex-direction: column;
 `;
 
 const Main = styled.main`
-    padding: 30px 40px;
-`;
-
-const H3 = styled.div`
-    margin-left: 6px;
-`;
-
-const HorizontalSpacer = styled.div`
-    height: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    padding: 0 40px;
 `;
 
 type ParticipantData = { name: string; videoURL: string; dataURL: string; dataContainer: DataContainerType | null };
@@ -41,7 +32,8 @@ type StateType = {
     password: string;
     mode: 'bar' | 'cloud';
     participantsData: ParticipantData[],
-    loading: boolean
+    loading: boolean,
+    error: Error | null
 };
 
 class App extends React.Component<{}, StateType> {
@@ -50,11 +42,12 @@ class App extends React.Component<{}, StateType> {
         password: "",
         mode: 'bar',
         loading: false,
-        participantsData: []
+        participantsData: [],
+        error: null
     };
 
-    getEmptyParticipantsData (): ParticipantData[] {
-        const { username, password } = this.state
+    getEmptyParticipantsData(): ParticipantData[] {
+        const {username, password} = this.state
         return [
             {
                 name: "Ian Jackson",
@@ -93,73 +86,40 @@ class App extends React.Component<{}, StateType> {
     loadData = async () => {
         this.setState({loading: true})
         try {
-            const participantsData  = this.getEmptyParticipantsData()
+            const participantsData = this.getEmptyParticipantsData()
             for (let pData of participantsData) {
                 pData.dataContainer = await loadEngagementData(this.state.username, this.state.password, pData.dataURL, false);
             }
             this.setState({participantsData});
+        } catch (error) {
+            this.setState({error})
         } finally {
             this.setState({loading: false})
         }
     };
 
     renderParticipants = () => {
-        let participants = [];
-        let i = 0;
-        for (let pData of this.state.participantsData) {
-            if (pData.dataContainer !== null) {
-                participants.push(
-                    <Participant
-                        key={"p" + i}
-                        dataContainer={pData.dataContainer}
-                        name={pData.name}
-                        videoURL={pData.videoURL}
-                        mode={this.state.mode}
-                    />
-                );
-                if (i < this.state.participantsData.length - 1) {
-                    participants.push(<HorizontalSpacer key={"s" + i}/>);
-                }
-            }
-            i++;
-        }
-        return participants;
+        return this.state.participantsData
+            .map((item, index) => item.dataContainer !== null
+                ? <Participant key={"p" + index} dataContainer={item.dataContainer} name={item.name}
+                               videoURL={item.videoURL} mode={this.state.mode}/>
+                : null)
+            .filter(item => !!item)
     };
 
     render() {
-        const {mode, username, password, loading} = this.state
-        return (
-            <Container>
-                <Navbar>
-                    <NavbarGroup>
-                        <Icon icon={IconNames.FULL_STACKED_CHART} iconSize={Icon.SIZE_LARGE}/>
-                        <NavbarHeading>
-                            <H3>XAI-Visualisations</H3>
-                        </NavbarHeading>
-                        <NavbarDivider/>
-                        <ButtonGroup>
-                            <Button icon="document-open" onClick={() => alert("tbd")}>
-                                Open...
-                            </Button>
-                        </ButtonGroup>
-                        <NavbarDivider/>
-                        <InputGroup placeholder="Username" onChange={this.onUsernameChange} value={username}/>
-                        <InputGroup placeholder="Password" type="password" onChange={this.onPasswordChange}
-                                    value={password}/>
-                        <Button onClick={this.loadData} loading={loading}>Load data</Button>
-                        <NavbarDivider/>
-                        <ButtonGroup>
-                            <Button active={mode === 'bar'} onClick={() => this.setState({mode: 'bar'})}>Bar
-                                charts</Button>
-                            <Button active={mode === 'cloud'} onClick={() => this.setState({mode: 'cloud'})}>Word
-                                cloud</Button>
-                        </ButtonGroup>
-                    </NavbarGroup>
-                </Navbar>
-
-                <Main>{this.renderParticipants()}</Main>
-            </Container>
-        );
+        const {mode, username, password, loading, error} = this.state
+        return <Container>
+            <NavBar username={username} password={password} mode={mode} loading={loading}
+                    setUsername={username => this.setState({username})}
+                    setPassword={password => this.setState({password})}
+                    setMode={mode => this.setState({mode})}
+                    loadData={this.loadData}
+                    showDevSettings={!window.location.hash}/>
+            <Main>{loading
+                ? <Spinner />
+                : error ? <Card>Some error occurred: ${error.message}</Card> : this.renderParticipants()}</Main>
+        </Container>
     }
 }
 
