@@ -274,10 +274,18 @@ export function generateDescriptionObject(
     output.username += firstCategory.type === FeatureCategoryType.POSSESSIVE ? "'s " : " ";
 
     let actCl = activationClause(firstCategory, firstValue, userGender);
+    let prefix, mainActivation;
+    if (firstCategory.type === FeatureCategoryType.POSSESSIVE) {
+        prefix = "";
+        mainActivation = categoryClause(firstCategory) + actCl.activationClausePrefix + actCl.activationClauseMain;
+    } else {
+        prefix = categoryClause(firstCategory) + actCl.activationClausePrefix;
+        mainActivation = actCl.activationClauseMain;
+    }
     output.categoryActivations.push({
         categoryId: firstCategory.id,
-        prefix: "",
-        mainActivationAsText: categoryClause(firstCategory) + actCl.activationClausePrefix + actCl.activationClauseMain,
+        prefix: prefix,
+        mainActivationAsText: mainActivation,
         suffix: "",
     });
 
