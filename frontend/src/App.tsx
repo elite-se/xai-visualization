@@ -43,6 +43,7 @@ type StateType = {
     sessionId: string;
     mode: 'bar' | 'cloud';
     participantsData: ParticipantData[],
+    discreteParticipantsData: ParticipantData[],
     loading: boolean,
     error: Error | null,
     paused: boolean,
@@ -58,6 +59,7 @@ class App extends React.Component<{}, StateType> {
         mode: "bar",
         loading: false,
         participantsData: [],
+        discreteParticipantsData: [],
         error: null,
         paused: true,
         showDevSettings: true,
@@ -101,15 +103,19 @@ class App extends React.Component<{}, StateType> {
         this.setState({ loading: true });
         try {
             const participantsData = this.getEmptyParticipantsData();
-            for (let pData of participantsData) {
-                pData.dataContainer = await loadEngagementData(
+            const discretePartData = this.getEmptyParticipantsData();
+            for (let i = 0; i < participantsData.length; i++) {
+                let engagementData = await loadEngagementData(
                     this.state.username,
                     this.state.password,
-                    pData.dataURL,
+                    participantsData[i].dataURL,
                     false
                 );
+                participantsData[i].dataContainer = engagementData[0];
+                discretePartData[i].dataContainer = engagementData[1];
             }
             this.setState({ participantsData });
+            this.setState({ discreteParticipantsData: discretePartData });
         } catch (error) {
             this.setState({ error });
         } finally {
@@ -125,8 +131,11 @@ class App extends React.Component<{}, StateType> {
 
     renderParticipants = () => {
         return this.state.participantsData
-            .map((item, index) => item.dataContainer !== null
-                ? <Participant key={"p" + index} dataContainer={item.dataContainer} name={item.name} gender={item.gender}
+            .map((item, index) =>
+                item.dataContainer !== null && this.state.discreteParticipantsData[index].dataContainer !== null
+                ? <Participant key={"p" + index} dataContainer={item.dataContainer}
+                    discreteContainer={this.state.discreteParticipantsData[index].dataContainer as DataContainerType }
+                    name={item.name} gender={item.gender}
                     volume={this.state.volume}
                     videoURL={item.videoURL} mode={this.state.mode} paused={this.state.paused} />
                 : null)
