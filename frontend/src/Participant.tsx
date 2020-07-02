@@ -31,6 +31,7 @@ class Participant extends React.Component<{
     videoURL: string; name: string;
         gender: Gender;
     dataContainer: DataContainerType;
+    discreteContainer: DataContainerType;
     mode: "bar" | "cloud";
     paused: boolean,
     volume: number
@@ -43,11 +44,12 @@ class Participant extends React.Component<{
     };
 
     render() {
-        const {videoURL, name, dataContainer, mode, volume} = this.props;
+        const {videoURL, name, dataContainer, discreteContainer, mode, volume} = this.props;
         const {currentTime} = this.state;
         const dataPoint = dataContainer?.data[Math.floor(currentTime * dataContainer?.sampleRate)];
+        const discreteDataPoint = discreteContainer?.data[Math.floor(currentTime * dataContainer?.sampleRate)];
 
-        const outputClass = dataPoint ? dataPoint.output.indexOf(Math.max(...dataPoint.output)) : 4;
+        const outputClass = discreteDataPoint ? discreteDataPoint.output.indexOf(Math.max(...discreteDataPoint.output)) : 4;
 
         return (
             <CustomCard elevation={Elevation.TWO}>
@@ -61,6 +63,7 @@ class Participant extends React.Component<{
                 <ExplanationsContainer
                     labels={dataContainer?.labels || []}
                     dataPoint={dataPoint}
+                    discreteDataPoint={discreteDataPoint}
                     mode={mode}
                     username={name}
                     gender={this.props.gender}

@@ -70,6 +70,7 @@ const Unsure = styled.div`
 
 function ExplanationsContainer(props: {
     dataPoint: { input: number[]; output: number[]; explanations: number[][] } | null;
+    discreteDataPoint: { input: number[]; output: number[]; explanations: number[][] } | null;
     labels: string[];
     maxExplanationValue: number;
     minInputValues: number[];
@@ -78,18 +79,31 @@ function ExplanationsContainer(props: {
     username: string;
     gender: Gender;
 }) {
-    const { maxInputValues, minInputValues, maxExplanationValue, dataPoint, username, gender, labels, mode } = props;
+    const { maxInputValues, minInputValues, maxExplanationValue, dataPoint, discreteDataPoint, username, gender,
+        labels, mode } = props;
     if (!dataPoint) return <Container />;
+    if (!discreteDataPoint) return <Container />;
     const { input, output, explanations } = dataPoint;
     const strongestOutputIdx = output.indexOf(Math.max(...output));
+    const discreteStrongestOutputIdx = discreteDataPoint.output.indexOf(Math.max(...discreteDataPoint.output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
 
     const inputNormalized = normalizeInput(input, minInputValues, maxInputValues);
+    const discreteInputNormalized = normalizeInput(discreteDataPoint.input, minInputValues, maxInputValues);
 
     const strongestOutputExplanations = sortAndSelectTopmostFeatures(
         labels,
         inputNormalized,
         explanations[strongestOutputIdx],
+        3,
+        0.2,
+        true
+    );
+
+    const discreteStrongestOutputExplanations = sortAndSelectTopmostFeatures(
+        labels,
+        discreteInputNormalized,
+        discreteDataPoint.explanations[discreteStrongestOutputIdx],
         3,
         0.2,
         true
@@ -101,12 +115,12 @@ function ExplanationsContainer(props: {
     return (
         <Container>
             <Explanations style={{ filter: `blur(${blur}px)` }}>
-                <ExplanationsHeading strongestOutputIdx={strongestOutputIdx} />
+                <ExplanationsHeading strongestOutputIdx={discreteStrongestOutputIdx} />
                 <BasedOn>
                     <span>Based on: </span>
                     <FeatureActivationTextDescription
-                        categoryIds={strongestOutputExplanations.topMostLabels}
-                        categoryValues={strongestOutputExplanations.topMostInputs}
+                        categoryIds={discreteStrongestOutputExplanations.topMostLabels}
+                        categoryValues={discreteStrongestOutputExplanations.topMostInputs}
                         username={username}
                         userGender={gender}
                         popOverDisabled={blur > 0}
