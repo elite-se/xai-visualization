@@ -5,11 +5,13 @@ import createBarChartOptions from "./createBarChartOptions";
 import {ResizeSensor} from "@blueprintjs/core";
 import styled from "styled-components";
 import {StrongestOutputExplanationsType} from "./sortAndSelectTopmostFeatures";
+import {CategoryValueDescription} from "./FeaturesToTextMapping";
 
 type PropsType = {
     strongestOutputExplanations: StrongestOutputExplanationsType,
     strongestOutputIdx: number,
-    maxExplanationValue: number
+    maxExplanationValue: number,
+    categoryActivationsObject: CategoryValueDescription
 }
 
 const StyledChart = styled(HorizontalBar)`
@@ -28,7 +30,7 @@ class BarChart extends React.Component<PropsType, { width: number, height: numbe
     })
 
     render() {
-        const {strongestOutputIdx, strongestOutputExplanations, maxExplanationValue} = this.props
+        const {strongestOutputIdx, strongestOutputExplanations, maxExplanationValue, categoryActivationsObject} = this.props
         const {width, height} = this.state
         const colorPalette = strongestOutputIdx < 2 ? ENGAGEMENT_NEGATIVE_COLOR_PALETTE : ENGAGEMENT_POSITIVE_COLOR_PALETTE;
 
@@ -38,7 +40,7 @@ class BarChart extends React.Component<PropsType, { width: number, height: numbe
                     width={width}
                     height={height}
                     data={{
-                        labels: strongestOutputExplanations.topMostLabels,
+                        labels: categoryActivationsObject.categoryActivations.map(item => item.mainActivationAsText),
                         datasets: [
                             {
                                 label: "Testing Explanations",
