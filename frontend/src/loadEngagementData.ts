@@ -230,15 +230,15 @@ const loadEngagementData = async (
         dataContainer.data = smoothData(dataContainer.data, windowSize);
     }
 
-    if (discretizeValues) {
-        dataContainer.data = discretizeDataPoints(dataContainer.data, dataContainer.sampleRate * 2, discretizeOutputOnly);
-    }
+    let discreteDataContainer: DataContainerType = JSON.parse(JSON.stringify(dataContainer));
+    discreteDataContainer.data = discretizeDataPoints(discreteDataContainer.data, dataContainer.sampleRate * 3, false);
+    dataContainer.data = discretizeDataPoints(dataContainer.data, dataContainer.sampleRate * 3, true);
 
     let maxValues = maxExplanationsAndMinMaxInputValue(dataContainer.data);
     dataContainer.maxExplanationValue = maxValues.maxExplanation;
     dataContainer.maxInputs = maxValues.maxInputValues;
     dataContainer.minInputs = maxValues.minInputValues;
-    return categorize(dataContainer, featuresToCategoryMapping);
+    return [categorize(dataContainer, featuresToCategoryMapping), categorize(discreteDataContainer, featuresToCategoryMapping)];
 };
 
 const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: number): DataPointType[] => {
