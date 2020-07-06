@@ -103,19 +103,18 @@ class App extends React.Component<{}, StateType> {
         this.setState({ loading: true });
         try {
             const participantsData = this.getEmptyParticipantsData();
-            const discretePartData = this.getEmptyParticipantsData();
+            const discreteParticipantsData = this.getEmptyParticipantsData();
             for (let i = 0; i < participantsData.length; i++) {
-                let engagementData = await loadEngagementData(
+                const engagementData = await loadEngagementData(
                     this.state.username,
                     this.state.password,
                     participantsData[i].dataURL,
                     false
                 );
                 participantsData[i].dataContainer = engagementData[0];
-                discretePartData[i].dataContainer = engagementData[1];
+                discreteParticipantsData[i].dataContainer = engagementData[1];
             }
-            this.setState({ participantsData });
-            this.setState({ discreteParticipantsData: discretePartData });
+            this.setState({ participantsData, discreteParticipantsData });
         } catch (error) {
             this.setState({ error });
         } finally {

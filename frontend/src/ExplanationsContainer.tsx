@@ -2,8 +2,8 @@ import React from "react";
 import styled from "styled-components";
 import WordCloud from "./WordCloud";
 import FeatureActivationTextDescription from "./FeatureActivationTextDescription";
-import { Gender } from "./FeaturesToTextMapping";
-import { ENGAGEMENT_NEGATIVE_COLOR_PALETTE, ENGAGEMENT_POSITIVE_COLOR_PALETTE } from "./EngagementDefinitions";
+import {Gender, generateDescriptionObject} from "./FeaturesToTextMapping";
+import {ENGAGEMENT_NEGATIVE_COLOR_PALETTE, ENGAGEMENT_POSITIVE_COLOR_PALETTE} from "./EngagementDefinitions";
 import sortAndSelectTopmostFeatures from "./sortAndSelectTopmostFeatures";
 import calculateBlur from "./calculateBlur";
 import ExplanationsHeading from "./ExplanationsHeading";
@@ -79,11 +79,13 @@ function ExplanationsContainer(props: {
     username: string;
     gender: Gender;
 }) {
-    const { maxInputValues, minInputValues, maxExplanationValue, dataPoint, discreteDataPoint, username, gender,
-        labels, mode } = props;
-    if (!dataPoint) return <Container />;
-    if (!discreteDataPoint) return <Container />;
-    const { input, output, explanations } = dataPoint;
+    const {
+        maxInputValues, minInputValues, maxExplanationValue, dataPoint, discreteDataPoint, username, gender,
+        labels, mode
+    } = props;
+    if (!dataPoint) return <Container/>;
+    if (!discreteDataPoint) return <Container/>;
+    const {input, output, explanations} = dataPoint;
     const strongestOutputIdx = output.indexOf(Math.max(...output));
     const discreteStrongestOutputIdx = discreteDataPoint.output.indexOf(Math.max(...discreteDataPoint.output));
     const confidence = Math.round(output[strongestOutputIdx] * 1000) / 10;
@@ -109,13 +111,20 @@ function ExplanationsContainer(props: {
         true
     );
 
+    const categoryActivationsObject = generateDescriptionObject(
+        strongestOutputExplanations.topMostLabels,
+        strongestOutputExplanations.topMostInputs,
+        username,
+        gender
+    );
+
     const blur = calculateBlur(confidence);
     const colorPalette = strongestOutputIdx < 2 ? ENGAGEMENT_NEGATIVE_COLOR_PALETTE : ENGAGEMENT_POSITIVE_COLOR_PALETTE;
 
     return (
         <Container>
-            <Explanations style={{ filter: `blur(${blur}px)` }}>
-                <ExplanationsHeading strongestOutputIdx={discreteStrongestOutputIdx} />
+            <Explanations style={{filter: `blur(${blur}px)`}}>
+                <ExplanationsHeading strongestOutputIdx={discreteStrongestOutputIdx}/>
                 <BasedOn>
                     <span>Based on: </span>
                     <FeatureActivationTextDescription
@@ -126,9 +135,10 @@ function ExplanationsContainer(props: {
                         popOverDisabled={blur > 0}
                     />
                 </BasedOn>
-                <ChartContainer style={{ width: "90%" }}>
+                <ChartContainer style={{width: "90%"}}>
                     {mode === "bar" ? (
                         <BarChart
+                            categoryActivationsObject={categoryActivationsObject}
                             strongestOutputIdx={strongestOutputIdx}
                             strongestOutputExplanations={strongestOutputExplanations}
                             maxExplanationValue={maxExplanationValue}
@@ -136,6 +146,7 @@ function ExplanationsContainer(props: {
                     ) : (
                         <WordCloud
                             allLabels={labels}
+                            categoryActivationsObject={categoryActivationsObject}
                             maxExplanationValue={maxExplanationValue}
                             strongestFeatures={strongestOutputExplanations.topMostExplanations}
                             strongestLabels={strongestOutputExplanations.topMostLabels}
@@ -144,7 +155,7 @@ function ExplanationsContainer(props: {
                     )}
                 </ChartContainer>
             </Explanations>
-            <Unsure style={{ opacity: blur > 0 ? 1 : 0 }}>UNSURE</Unsure>
+            <Unsure style={{opacity: blur > 0 ? 1 : 0}}>UNSURE</Unsure>
         </Container>
     );
 }

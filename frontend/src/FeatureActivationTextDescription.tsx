@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import { generateDescriptionObject, Gender, CATEGORY_DEFINITIONS } from "./FeaturesToTextMapping";
-import { Popover, PopoverInteractionKind, Colors } from "@blueprintjs/core";
+import {CATEGORY_DEFINITIONS, Gender, generateDescriptionObject} from "./FeaturesToTextMapping";
+import {Colors, Popover, PopoverInteractionKind} from "@blueprintjs/core";
 
 const MainActivation = styled.span`
     white-space: pre;
@@ -56,7 +56,7 @@ function FeatureActivationTextDescription(props: {
 
         let contextDialogContent = (
             <Definition>
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{display: "flex", alignItems: "center"}}>
                     <Emoji>{categoryDesc.emoji}</Emoji> <h2>{categoryDesc.id}</h2>
                 </div>
                 <p>{categoryDesc.definition}</p>
@@ -66,12 +66,10 @@ function FeatureActivationTextDescription(props: {
         activationSpans.push(
             <span key={activation.categoryId}>
                 {activation.prefix}
-                <Popover
-                    interactionKind={PopoverInteractionKind.HOVER}
-                    hoverOpenDelay={50}
-                    hoverCloseDelay={50}
-                    disabled={props.popOverDisabled}
-                >
+                <Popover interactionKind={PopoverInteractionKind.HOVER}
+                         hoverOpenDelay={50}
+                         hoverCloseDelay={50}
+                         disabled={props.popOverDisabled}>
                     <MainActivation className={props.popOverDisabled ? "" : "allowHover"}>
                         {activation.mainActivationAsText}
                     </MainActivation>
@@ -82,15 +80,15 @@ function FeatureActivationTextDescription(props: {
                 {i === activations.length - 2
                     ? categoryActivationsObject.lastConnector
                     : i < activations.length - 2
-                    ? categoryActivationsObject.connector
-                    : ""}
+                        ? categoryActivationsObject.connector
+                        : ""}
             </span>
         );
         i++;
     }
 
     return (
-        <span style={{ fontSize: "1.1rem", margin: 0 }}>
+        <span style={{fontSize: "1.1rem", margin: 0}}>
             {categoryActivationsObject.username} {activationSpans}.
         </span>
     );

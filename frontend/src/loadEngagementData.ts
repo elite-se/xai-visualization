@@ -230,11 +230,11 @@ const loadEngagementData = async (
         dataContainer.data = smoothData(dataContainer.data, windowSize);
     }
 
-    let discreteDataContainer: DataContainerType = JSON.parse(JSON.stringify(dataContainer));
+    const discreteDataContainer: DataContainerType = JSON.parse(JSON.stringify(dataContainer));
     discreteDataContainer.data = discretizeDataPoints(discreteDataContainer.data, dataContainer.sampleRate * 3, false);
     dataContainer.data = discretizeDataPoints(dataContainer.data, dataContainer.sampleRate * 3, true);
 
-    let maxValues = maxExplanationsAndMinMaxInputValue(dataContainer.data);
+    const maxValues = maxExplanationsAndMinMaxInputValue(dataContainer.data);
     dataContainer.maxExplanationValue = maxValues.maxExplanation;
     dataContainer.maxInputs = maxValues.maxInputValues;
     dataContainer.minInputs = maxValues.minInputValues;
@@ -271,18 +271,14 @@ const smoothUsingPredictions = (dataContainer: DataContainerType, windowSize: nu
 };
 
 const discretizeDataPoints = (data: DataPointType[], intervalFrames: number, outputOnly = false): DataPointType[] => {
-    let inputLength = data[0].input.length;
-    let outputLength = data[0].output.length;
-    let explanationsLength = data[0].explanations.length;
+    const inputLength = data[0].input.length;
+    const outputLength = data[0].output.length;
+    const explanationsLength = data[0].explanations.length;
     const smoothedData: DataPointType[] = Array(data.length);
     for (let currentIntervalStart = 0; currentIntervalStart < data.length; currentIntervalStart += intervalFrames) {
-        let currentIntervalEnd = currentIntervalStart + intervalFrames;
-        if (currentIntervalEnd > data.length) currentIntervalEnd = data.length;
-        let currentIntervalLength = currentIntervalEnd - currentIntervalStart;
-        if (currentIntervalLength === 0) {
-            break;
-        }
-        let averagePoint: DataPointType = {
+        let currentIntervalEnd = Math.min(currentIntervalStart + intervalFrames, data.length)
+        const currentIntervalLength = currentIntervalEnd - currentIntervalStart;
+        const averagePoint: DataPointType = {
             input: new Array(inputLength).fill(0),
             output: new Array(outputLength).fill(0),
             explanations: new Array(explanationsLength).fill(new Array(data[0].explanations[0].length).fill(0))
@@ -294,10 +290,10 @@ const discretizeDataPoints = (data: DataPointType[], intervalFrames: number, out
                 row.map((val, k) => val + data[i].explanations[j][k])
             );
         }
-        averagePoint.input = averagePoint.input.map((val) => val / currentIntervalLength);
-        averagePoint.output = averagePoint.output.map((val) => val / currentIntervalLength);
-        averagePoint.explanations = averagePoint.explanations.map((row) =>
-            row.map((val) => val / currentIntervalLength)
+        averagePoint.input = averagePoint.input.map(val => val / currentIntervalLength);
+        averagePoint.output = averagePoint.output.map(val => val / currentIntervalLength);
+        averagePoint.explanations = averagePoint.explanations.map(row =>
+            row.map(val => val / currentIntervalLength)
         );
 
         for (let i = currentIntervalStart; i < currentIntervalEnd; i++) {
