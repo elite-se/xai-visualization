@@ -19,10 +19,11 @@ In an activated (and set up) conda environment run:
 
 `xai-train`
 
-### Run the evaluation
+### Generate explanations
 
-In activated (and set up) conda environment run:
+`xai-explain`
 
-`scripts/xai-train`
-`scripts/xai-explain`
-`scripts/xai-plot`
+
+### Plot the data
+
+`xai-plot`
