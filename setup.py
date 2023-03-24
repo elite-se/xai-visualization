@@ -15,7 +15,7 @@ setup(
         'matplotlib==3.2.1',
         'scikit-learn==0.23.1',
         'numpy==1.16.4',
-        'tensorflow==1.15',
+        'tensorflow==2.11.1',
         'lime==0.2.0.0',
         'hickle==3.4.6',
         'shap==0.35.0',
